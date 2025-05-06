@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { products, statsLabels } from "@/data/products";
 
 const categories = [
@@ -12,12 +12,22 @@ const categories = [
   "Colliers",
   "Bagues",
   "Bracelets",
-  "Accessoires",
 ] as const;
 
-export function ProductGrid() {
-  const [selectedCategory, setSelectedCategory] =
-    useState<(typeof categories)[number]>("Tous");
+type ProductGridProps = {
+  defaultCategory?: string;
+};
+
+export function ProductGrid({ defaultCategory = "Tous" }: ProductGridProps) {
+  const [selectedCategory, setSelectedCategory] = useState<
+    (typeof categories)[number]
+  >(defaultCategory as (typeof categories)[number]);
+
+  useEffect(() => {
+    if (defaultCategory && defaultCategory !== "Tous") {
+      setSelectedCategory(defaultCategory as (typeof categories)[number]);
+    }
+  }, [defaultCategory]);
 
   const filteredProducts =
     selectedCategory === "Tous"
@@ -49,67 +59,74 @@ export function ProductGrid() {
 
   return (
     <section className="">
-      {/* Catégories */}
-      <div className="mb-12  ">
-        <div className="">
-          {/* Titre de la section */}
-          <motion.h2
-            className="text-center mb-8 text-xl text-black font-cinzel-decorative"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            Nos Collections
-          </motion.h2>
+      {/* Catégories - Masquer si une catégorie par défaut est fournie */}
+      {!defaultCategory || defaultCategory === "Tous" ? (
+        <div className="mb-12">
+          <div className="">
+            {/* Titre de la section modifié */}
+            <motion.div
+              className="text-center mb-12 space-y-3"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <h2 className="cinzel-decorative-black text-3xl md:text-4xl font-light tracking-tight">
+                Nos Collections
+              </h2>
+            </motion.div>
 
-          {/* Container des filtres */}
-          <div className="bg-black/99 backdrop-blur-sm rounded-2xl p-6 border border-zinc-800/50 overflow-hidden">
-            <div className="flex flex-wrap gap-3 justify-center min-w-0">
-              {categories.map((category) => (
-                <motion.button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
-                  className={`relative px-6 py-3 text-sm tracking-wider rounded-xl transition-all duration-500 overflow-hidden ${
-                    selectedCategory === category
-                      ? "text-amber-200"
-                      : "text-zinc-400 hover:text-amber-200/80"
-                  }`}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {/* Fond actif */}
-                  {selectedCategory === category && (
-                    <motion.div
-                      className="cursor-pointer absolute inset-0 bg-gradient-to-r from-amber-400/10 via-amber-400/15 to-amber-400/10 border border-amber-400/20 rounded-xl"
-                      layoutId="activeCategory"
-                      transition={{
-                        type: "spring",
-                        bounce: 0.2,
-                        duration: 0.6,
-                      }}
-                    />
-                  )}
-
-                  {/* Compteur de produits */}
-                  <span className="cursor-pointer relative z-10 flex items-center gap-2">
-                    {category}
-                    {category !== "Tous" && (
-                      <span
-                        className={`text-xs px-2 py-0.5 rounded-full ${
-                          selectedCategory === category
-                            ? "bg-amber-400/20 text-amber-200"
-                            : "bg-zinc-800 text-zinc-500"
-                        }`}
-                      >
-                        {products.filter((p) => p.category === category).length}
-                      </span>
+            {/* Container des filtres */}
+            <div className="bg-black/99 backdrop-blur-sm rounded-2xl p-6 border border-zinc-800/50 overflow-hidden">
+              <div className="flex flex-wrap gap-3 justify-center min-w-0">
+                {categories.map((category) => (
+                  <motion.button
+                    key={category}
+                    onClick={() => setSelectedCategory(category)}
+                    className={`relative px-6 py-3 text-sm tracking-wider rounded-xl transition-all duration-500 overflow-hidden ${
+                      selectedCategory === category
+                        ? "text-amber-200"
+                        : "text-zinc-400 hover:text-amber-200/80"
+                    }`}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {/* Fond actif */}
+                    {selectedCategory === category && (
+                      <motion.div
+                        className="cursor-pointer absolute inset-0 bg-gradient-to-r from-amber-400/10 via-amber-400/15 to-amber-400/10 border border-amber-400/20 rounded-xl"
+                        layoutId="activeCategory"
+                        transition={{
+                          type: "spring",
+                          bounce: 0.2,
+                          duration: 0.6,
+                        }}
+                      />
                     )}
-                  </span>
-                </motion.button>
-              ))}
+
+                    {/* Compteur de produits */}
+                    <span className="cursor-pointer relative z-10 flex items-center gap-2">
+                      {category}
+                      {category !== "Tous" && (
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded-full ${
+                            selectedCategory === category
+                              ? "bg-amber-400/20 text-amber-200"
+                              : "bg-zinc-800 text-zinc-500"
+                          }`}
+                        >
+                          {
+                            products.filter((p) => p.category === category)
+                              .length
+                          }
+                        </span>
+                      )}
+                    </span>
+                  </motion.button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      ) : null}
 
       {/* Grille de produits avec animation des filtres */}
       <AnimatePresence mode="wait">

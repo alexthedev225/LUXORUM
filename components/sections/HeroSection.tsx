@@ -7,60 +7,46 @@ import { motion } from "framer-motion";
 
 export function HeroSection() {
   return (
-    <section className="rounded-2xl relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Fond animé luxueux - z-index bas */}
-      <div className="absolute inset-0 bg-black/95 z-0">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden rounded-2xl">
+      {/* Fond statique luxueux */}
+      <div className="absolute inset-0 bg-black">
         {/* Dégradé de base */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black via-zinc-900/50 to-black opacity-90" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black via-zinc-950 to-black" />
 
-        {/* Textures et effets lumineux */}
-        <div
-          className="absolute inset-0 mix-blend-overlay opacity-30"
-          style={{
-            backgroundImage: `
-              radial-gradient(circle at center, rgba(212, 175, 55, 0.15), transparent 60%),
-              repeating-linear-gradient(45deg, rgba(212, 175, 55, 0.05) 0px, transparent 1px, transparent 2px)
-            `,
-          }}
-        />
-
-        {/* Brume dorée animée */}
-        <div
-          className="absolute inset-0 animate-pulse opacity-20"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.3), transparent 70%)",
-          }}
-        />
+        {/* Texture et overlay statiques */}
+        <div className="absolute inset-0">
+          {/* Texture subtile */}
+          <div
+            className="absolute inset-0 opacity-20"
+            style={{
+              backgroundImage: `
+            radial-gradient(circle at center, rgba(212, 175, 55, 0.15), transparent 60%),
+            repeating-linear-gradient(45deg, rgba(212, 175, 55, 0.05) 0px, transparent 1px, transparent 2px)
+          `,
+            }}
+          />
+          {/* Overlay pour profondeur */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
+        </div>
       </div>
 
-      {/* Contenu principal - z-index élevé */}
+      {/* Contenu principal avec animations */}
       <motion.div
         className="relative z-10 text-center px-8 space-y-10 max-w-5xl mx-auto"
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1 }}
       >
-        {/* Logo LUXORUM avec effet amélioré */}
-        <motion.div
-          className="relative"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2, delay: 0.2 }}
-        >
-          {/* Effet de lueur */}
-          <div className="absolute -inset-x-8 -inset-y-4 bg-amber-400/10 blur-3xl rounded-full" />
-
-          <h1 className="relative cinzel-decorative-black text-5xl md:text-6xl lg:text-7xl font-black tracking-tight">
-            <span className="inline-block bg-gradient-to-r from-amber-200 via-amber-400 to-amber-200 bg-clip-text text-transparent animate-shimmer whitespace-nowrap px-4">
-              LUXORUM
-            </span>
+        {/* Logo LUXORUM */}
+        <div className="w-full overflow-visible">
+          <h1 className="cinzel-decorative-black text-5xl md:text-6xl lg:text-7xl text-amber-200 tracking-tight break-words max-w-full font-bold">
+            LUXORUM
           </h1>
-        </motion.div>
+        </div>
 
-        {/* Sous-titre avec z-index */}
+        {/* Sous-titre */}
         <motion.h2
-          className="relative z-10 text-2xl md:text-3xl font-light tracking-[0.2em] text-white"
+          className="text-2xl md:text-3xl font-light tracking-[0.1em] text-white"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 0.4 }}
@@ -90,7 +76,7 @@ export function HeroSection() {
             asChild
             className="group relative overflow-hidden rounded-full bg-black/20 backdrop-blur-sm border border-amber-400/20 hover:border-amber-400/40 px-12 py-7 transition-all duration-500"
           >
-            <Link href="/collections" className="flex items-center gap-3">
+            <Link href="/boutique" className="flex items-center gap-3">
               <span className="relative z-10 text-lg text-amber-200 group-hover:text-amber-100 transition-colors">
                 Explorer la collection
               </span>

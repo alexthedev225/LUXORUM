@@ -6,12 +6,14 @@ import { AboutSection } from "@/components/sections/AboutSection";
 
 export default function Home() {
   return (
-    <main>
-      <HeroSection />
-      <FeaturedProducts />
-      <CategoriesSection />
-      <AboutSection />
-      <PromoBanner />
+    <main className="space-y-2">
+      <div className="flex flex-col gap-2 mb-2">
+        <HeroSection />
+        <FeaturedProducts />
+        <CategoriesSection />
+        <AboutSection />
+        <PromoBanner />
+      </div>
     </main>
   );
 }

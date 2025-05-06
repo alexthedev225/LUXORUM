@@ -43,8 +43,19 @@ const config = {
         },
       },
       fontFamily: {
-        serif: ["var(--font-cinzel)"],
-        "cinzel-decorative": ["var(--font-cinzel-decorative)"],
+        cinzel: ["Cinzel", "serif"],
+        "cinzel-decorative": ["Cinzel Decorative", "serif"],
+      },
+      backgroundImage: {
+        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
+        "gradient-conic": "conic-gradient(var(--tw-gradient-stops))",
+      },
+      animation: {
+        "gold-breathe": "gold-breathe 8s ease-in-out infinite",
+        "gold-pulse": "gold-pulse 12s ease-in-out infinite",
+        "gold-rotate": "gold-rotate 20s linear infinite",
+        "gold-shimmer": "gold-shimmer 15s ease-in-out infinite",
+        "gold-stars": "gold-stars 10s ease-in-out infinite",
       },
     },
   },

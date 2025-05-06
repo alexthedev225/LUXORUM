@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 
 export function AboutSection() {
   return (
-    <section className="my-10 py-32 bg-black relative overflow-hidden rounded-2xl">
+    <section className=" py-32 bg-black relative overflow-hidden rounded-2xl">
       <motion.div
         className="container px-8 mx-auto md:pr-8 lg:pl-0"
         initial={{ opacity: 0 }}
@@ -46,7 +46,7 @@ export function AboutSection() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4 }}
               >
-                Depuis 2020
+                Depuis 2025
               </motion.p>
               <motion.h2
                 className="cinzel-decorative-black text-3xl md:text-4xl lg:text-5xl text-white font-light tracking-tight"

@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 
 export function PromoBanner() {
   return (
-    <section className="relative my-10 overflow-hidden rounded-2xl">
+    <section className="relative overflow-hidden rounded-2xl">
       {/* Arrière-plan luxueux avec dégradé subtil */}
       <div className="absolute inset-0 bg-black">
         <div className="absolute inset-0 bg-gradient-to-b from-zinc-900/20 via-black to-black" />

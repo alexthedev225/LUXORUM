@@ -44,7 +44,7 @@ const categories = [
 
 export function CategoriesSection() {
   return (
-    <section className="mt-10 py-32 bg-black rounded-2xl">
+    <section className="py-32 bg-black rounded-2xl">
       <motion.div
         className="container mx-auto px-6"
         initial={{ opacity: 0 }}
@@ -70,7 +70,7 @@ export function CategoriesSection() {
           </motion.h2>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-zinc-800 rounded-2xl overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-zinc-800/30 rounded-2xl overflow-hidden">
           {categories.map((category, i) => (
             <motion.div
               key={category.name}
@@ -79,13 +79,13 @@ export function CategoriesSection() {
               transition={{ delay: 0.2 + i * 0.1 }}
             >
               <Link href={category.href} className="block group">
-                <div className="relative bg-zinc-900 h-full">
-                  <div className="relative z-10 p-8 md:p-12 h-full flex flex-col justify-between min-h-[320px] transition-colors duration-500 group-hover:bg-zinc-800">
+                <div className="relative bg-black h-full">
+                  <div className="relative z-10 p-8 md:p-12 h-full flex flex-col justify-between min-h-[320px] transition-colors duration-500 group-hover:bg-zinc-900/50">
                     <div className="space-y-4">
                       <p className="text-zinc-500 text-xs tracking-[0.2em] uppercase font-light">
                         {category.position}
                       </p>
-                      <h3 className="text-2xl text-white font-light tracking-tight">
+                      <h3 className="text-2xl text-white font-light tracking-tight group-hover:text-amber-200 transition-colors duration-300">
                         {category.name}
                       </h3>
                       <p className="text-zinc-400 font-light">
@@ -99,7 +99,7 @@ export function CategoriesSection() {
                       </span>
                     </div>
 
-                    <div className="absolute inset-0 border border-zinc-800 pointer-events-none transition-all duration-500 group-hover:border-zinc-700" />
+                    <div className="absolute inset-0 border border-zinc-800/50 pointer-events-none transition-colors duration-500 group-hover:border-amber-200/20" />
                   </div>
                 </div>
               </Link>

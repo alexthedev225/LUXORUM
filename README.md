@@ -1,4 +1,49 @@
+# Luxorum App
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+
+## 📚 Configuration de la base de données
+
+### 1. Configuration rapide (Recommandé)
+
+```bash
+# Installez les dépendances
+npm install
+
+# Lancez l'assistant de configuration
+node scripts/setup-database.js
+```
+
+### 2. Configuration manuelle
+
+Si vous préférez configurer manuellement :
+
+1. Copiez `.env.example` vers `.env`
+2. Modifiez les variables avec vos informations Neon
+3. Assurez-vous d'ajouter :
+   - Le port `:5432`
+   - `connect_timeout=30`
+   - La bonne URL directe
+
+### ⚠️ Points importants
+
+- Ne pas oublier le port `:5432`
+- Ajouter `connect_timeout=30`
+- Configurer `DIRECT_URL` pour les migrations
+- Vérifier les URLs pooler/non-pooler
+
+### 🔍 Verification
+
+```bash
+# Vérifiez la connexion
+npx prisma db push
+```
+
+## 🚀 Démarrage
+
+```bash
+npm run dev
+```
 
 ## Getting Started
 
@@ -34,4 +79,3 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# LUXORUM

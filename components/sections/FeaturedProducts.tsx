@@ -25,7 +25,7 @@ function ProductCard({ product }: { product: Product }) {
   return (
     <motion.div variants={item}>
       <Link href={`/boutique/${product.id}`} className="group block">
-        <article className="bg-black/90 backdrop-blur-xl rounded-2xl overflow-hidden border border-zinc-800/20">
+        <article className="bg-black/90 backdrop-blur-xl rounded-2xl overflow-hidden border  border-amber-400/20">
           {/* Image Container */}
           <div className="relative aspect-square">
             <Image
@@ -79,31 +79,38 @@ function ProductCard({ product }: { product: Product }) {
           </div>
 
           {/* Content */}
-          <div className="p-6 space-y-4 border-t border-zinc-800/50">
-            <div className="flex justify-between items-start">
-              <div className="space-y-2">
-                <p className="text-[10px] tracking-[0.2em] uppercase text-zinc-400/90 font-light">
-                  {product.category}
+          <div className="p-6 space-y-6 border-t border-amber-400/20">
+            <div className="space-y-4">
+              <div className="flex justify-between items-start">
+                <div className="space-y-2">
+                  <p className="text-[10px] tracking-[0.2em] uppercase text-zinc-100 font-light">
+                    {product.category}
+                  </p>
+                  <h3 className="font-cinzel-decorative text-xl text-white group-hover:text-amber-200/95 transition-colors duration-300">
+                    {product.name}
+                  </h3>
+                </div>
+                <p className="text-lg font-light text-amber-300/95">
+                  {product.price.toLocaleString("fr-FR")} €
                 </p>
-                <h3 className="font-cinzel-decorative text-xl text-white/95 group-hover:text-amber-200/95 transition-colors duration-300">
-                  {product.name}
-                </h3>
               </div>
-              <p className="text-lg font-light text-amber-300/95">
-                {product.price.toLocaleString("fr-FR")} €
+
+              {/* Description ajoutée */}
+              <p className="text-sm text-zinc-200 font-light leading-relaxed">
+                {product.description}
               </p>
             </div>
 
             {/* Collection tag et caractéristiques */}
             <div className="pt-4 flex flex-wrap gap-2">
-              <span className="px-2 py-1 text-[10px] bg-amber-400/20 rounded-full text-amber-200/95">
+              <span className="px-2 py-1 text-[10px] bg-amber-400/20 rounded-full text-amber-200">
                 {product.specifications.collection}
               </span>
               {product.specifications.additionalDetails?.map(
                 (detail, index) => (
                   <span
                     key={index}
-                    className="px-2 py-1 text-[10px] bg-zinc-800/60 rounded-full text-zinc-300/90"
+                    className="px-2 py-1 text-[10px] bg-zinc-800/60 rounded-full text-white"
                   >
                     {detail}
                   </span>
@@ -113,10 +120,10 @@ function ProductCard({ product }: { product: Product }) {
 
             {/* CTA */}
             <div className="pt-4 flex items-center justify-between">
-              <span className="text-sm text-zinc-400/90 group-hover:text-amber-200/95 transition-colors duration-300">
+              <span className="text-sm text-zinc-200/90 group-hover:text-amber-200/95 transition-colors duration-300">
                 Découvrir →
               </span>
-              <span className="text-xs text-zinc-600/90">
+              <span className="text-xs text-zinc-200/90">
                 #{String(product.id).padStart(3, "0")}
               </span>
             </div>
@@ -132,7 +139,7 @@ function ProductCard({ product }: { product: Product }) {
 
 export function FeaturedProducts() {
   return (
-    <section className="relative py-32 bg-black overflow-hidden mt-10 rounded-2xl">
+    <section className="relative py-32 bg-black overflow-hidden rounded-2xl">
       {/* Fond avec effet de profondeur */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-b from-zinc-900/30 to-black" />

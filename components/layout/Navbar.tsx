@@ -15,14 +15,12 @@ import {
   NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
-  NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 
 const routes = [
   { name: "Accueil", path: "/" },
-  { name: "Boutique", path: "/boutique" },
   { name: "À propos", path: "/a-propos" },
   { name: "Contact", path: "/contact" },
 ];
@@ -31,38 +29,32 @@ const categories = [
   {
     name: "Montres",
     description: "Chronographes & Automatiques",
-    href: "/categories/montres",
+    href: "/boutique/categories/montres",
     position: "Collection Horlogerie",
   },
   {
     name: "Colliers",
     description: "Chaînes & Pendentifs",
-    href: "/categories/colliers",
+    href: "/boutique/categories/colliers",
     position: "Collection Prestige",
   },
   {
     name: "Bagues",
     description: "Chevalières & Alliances",
-    href: "/categories/bagues",
+    href: "/boutique/categories/bagues",
     position: "Collection Exclusive",
   },
   {
     name: "Lunettes",
     description: "Optique & Solaire",
-    href: "/categories/lunettes",
+    href: "/boutique/categories/lunettes",
     position: "Collection Élégance",
   },
   {
     name: "Bracelets",
     description: "Joncs & Mailles",
-    href: "/categories/bracelets",
+    href: "/boutique/categories/bracelets",
     position: "Collection Signature",
-  },
-  {
-    name: "Accessoires",
-    description: "Pièces Uniques",
-    href: "/categories/accessoires",
-    position: "Collection Privée",
   },
 ];
 
@@ -80,7 +72,7 @@ export function Navbar() {
 
   return (
     <header className="fixed w-full top-4 z-50">
-      <nav className="px-4 mx-8 lg:mx-10 relative">
+      <nav className="px-4 mx-2  relative">
         {/* Background avec transition */}
         <div
           className={`absolute inset-0 transition-all duration-300 rounded-2xl border border-zinc-800/50 ${
@@ -92,7 +84,7 @@ export function Navbar() {
           {/* Logo avec transition */}
           <Link href="/" className="shrink-0">
             <motion.span
-              className="font-serif sm:text-lg text-amber-200/90 hover:text-amber-200 transition-colors duration-500"
+              className="font-serif sm:text-lg text-amber-200/90 hover:text-amber-200 transition-colors duration-500 cinzel-decorative-black"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
@@ -103,24 +95,48 @@ export function Navbar() {
 
           {/* Navigation Desktop avec transitions */}
           <div className="hidden lg:flex items-center space-x-6 lg:space-x-8">
-            {/* Menu Collections avec style dark */}
+            {/* Menu Collections comme navigation principale */}
             <NavigationMenu>
               <NavigationMenuList>
                 <NavigationMenuItem>
                   <NavigationMenuTrigger
-                    className="text-sm tracking-wider uppercase font-light 
-                             bg-black text-zinc-400 hover:text-amber-200
+                    className="p-2 text-sm tracking-wider uppercase font-light 
+                             bg-black text-zinc-100 hover:text-amber-200
                              hover:bg-zinc-900/90 data-[state=open]:bg-zinc-900/90 
                              data-[state=open]:text-amber-200
                              transition-colors duration-300 
                              border border-zinc-800/50
-                             cursor-pointer"
+                             cursor-pointer group flex items-center gap-2"
                   >
-                    Collections
+                    Collections & Boutique
+                    <ChevronDown
+                      className="relative top-[1px] h-3 w-3 transition duration-300 group-data-[state=open]:rotate-180"
+                      aria-hidden="true"
+                    />
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
                     <div className="w-[600px] bg-black/95 backdrop-blur-xl border border-zinc-800/50 rounded-xl overflow-hidden">
                       <div className="grid grid-cols-2 gap-0.5 bg-zinc-800/50">
+                        {/* Lien "Voir toute la boutique" */}
+                        <Link
+                          href="/boutique"
+                          className="col-span-2 block bg-black/95 p-6 transition-all duration-300 hover:bg-zinc-900/90 group border-b border-zinc-800/50"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h3 className="text-sm font-medium text-amber-200/80 group-hover:text-amber-200 transition-colors">
+                                Découvrir toutes nos collections
+                              </h3>
+                              <p className="text-xs text-zinc-100 group-hover:text-zinc-300 transition-colors mt-1">
+                                Explorer notre boutique complète
+                              </p>
+                            </div>
+                            <span className="text-zinc-500 group-hover:text-amber-200 transition-colors">
+                              →
+                            </span>
+                          </div>
+                        </Link>
+                        {/* Catégories existantes */}
                         {categories.map((category) => (
                           <Link
                             key={category.name}
@@ -131,10 +147,10 @@ export function Navbar() {
                               <h3 className="text-sm font-medium text-amber-200/80 group-hover:text-amber-200 transition-colors">
                                 {category.name}
                               </h3>
-                              <p className="text-xs text-zinc-400 group-hover:text-zinc-300 transition-colors">
+                              <p className="text-xs text-zinc-100  transition-colors">
                                 {category.description}
                               </p>
-                              <p className="text-[10px] text-zinc-500 font-light tracking-wider group-hover:text-zinc-400 transition-colors">
+                              <p className="text-[10px] text-zinc-200 font-light tracking-wider  transition-colors">
                                 {category.position}
                               </p>
                             </div>
@@ -146,13 +162,15 @@ export function Navbar() {
                 </NavigationMenuItem>
               </NavigationMenuList>
             </NavigationMenu>
+
+            {/* Routes restantes */}
             {routes.map((route) => (
               <Link
                 key={route.path}
                 href={route.path}
                 className="relative group py-2"
               >
-                <span className="text-sm tracking-wider uppercase font-light text-zinc-400 hover:text-amber-200 transition-colors duration-300">
+                <span className="text-sm tracking-wider uppercase font-light text-zinc-100 hover:text-amber-200 transition-colors duration-300">
                   {route.name}
                 </span>
                 <span className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-amber-400/0 via-amber-400 to-amber-400/0 scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
@@ -169,7 +187,7 @@ export function Navbar() {
                 size="icon"
                 className="w-10 h-10 rounded-full hover:bg-zinc-800/50 transition-colors duration-300 bg-black"
               >
-                <Icon className="w-5 h-5 text-zinc-400 hover:text-amber-200 transition-colors duration-300" />
+                <Icon className="w-5 h-5 text-zinc-100 hover:text-amber-200 transition-colors duration-300" />
               </Button>
             ))}
 
@@ -179,9 +197,9 @@ export function Navbar() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="w-10 h-10 rounded-full hover:bg-zinc-800/50 transition-colors duration-300 bg-black"
+                  className="w-10 h-10 rounded-full hover:bg-zinc-800/90 transition-colors duration-300 bg-black"
                 >
-                  <Menu className="w-5 h-5 text-zinc-400 hover:text-amber-200 transition-colors duration-300" />
+                  <Menu className="w-5 h-5 text-zinc-100 hover:text-amber-200 transition-colors duration-300" />
                 </Button>
               </SheetTrigger>
               <SheetContent
@@ -200,7 +218,7 @@ export function Navbar() {
                     <Link
                       key={route.path}
                       href={route.path}
-                      className="block py-4 text-sm uppercase tracking-wider text-zinc-400 hover:text-amber-200 transition-colors duration-300"
+                      className="block py-4 text-sm uppercase tracking-wider text-zinc-100 hover:text-amber-200 transition-colors duration-300"
                     >
                       {route.name}
                     </Link>
@@ -218,13 +236,13 @@ export function Navbar() {
                           className="block group"
                         >
                           <div className="space-y-1">
-                            <h4 className="text-sm font-medium text-zinc-400 hover:text-amber-200 transition-colors duration-300">
+                            <h4 className="text-sm font-medium text-zinc-100 hover:text-amber-200 transition-colors duration-300">
                               {category.name}
                             </h4>
-                            <p className="text-xs text-zinc-500 transition-colors duration-300">
+                            <p className="text-xs text-zinc-100 transition-colors duration-300">
                               {category.description}
                             </p>
-                            <p className="text-xs italic text-zinc-600 transition-colors duration-300">
+                            <p className="text-xs italic text-zinc-100 transition-colors duration-300">
                               {category.position}
                             </p>
                           </div>
