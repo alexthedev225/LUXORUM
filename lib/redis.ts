@@ -5,6 +5,7 @@ const redis = new Redis({
   token: process.env.UPSTASH_REDIS_REST_TOKEN!,
 });
 
+
 export async function cacheGet<T>(key: string): Promise<T | null> {
   const data = await redis.get(key);
   return data as T;

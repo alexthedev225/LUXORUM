@@ -18,6 +18,10 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
+import { useIsAuthOrAdminPage } from "@/hooks/useIsAuthPage";
+import { useCartStore } from "@/stores/cart"; // adapte le chemin exact
+
+
 
 const routes = [
   { name: "Accueil", path: "/" },
@@ -45,12 +49,6 @@ const categories = [
     position: "Collection Exclusive",
   },
   {
-    name: "Lunettes",
-    description: "Optique & Solaire",
-    href: "/boutique/categories/lunettes",
-    position: "Collection Élégance",
-  },
-  {
     name: "Bracelets",
     description: "Joncs & Mailles",
     href: "/boutique/categories/bracelets",
@@ -59,6 +57,8 @@ const categories = [
 ];
 
 export function Navbar() {
+    const isAuthPage = useIsAuthOrAdminPage();
+
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -69,6 +69,11 @@ export function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+    if (isAuthPage) return null;
+
+const { getTotalItems } = useCartStore();
+const totalItems = getTotalItems();
 
   return (
     <header className="fixed w-full top-4 z-50">
@@ -180,16 +185,33 @@ export function Navbar() {
 
           {/* Actions avec transitions */}
           <div className="flex items-center gap-1">
-            {[ShoppingBag, User].map((Icon, index) => (
+            {/* Actions avec transitions */}
+            <div className="flex items-center gap-1">
+              {/* Bouton Panier avec badge */}
+              <Link href={"/cart"}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="w-10 h-10 rounded-full hover:bg-zinc-800/50 transition-colors duration-300 bg-black relative"
+                >
+                  <ShoppingBag className="w-5 h-5 text-zinc-100 hover:text-amber-200 transition-colors duration-300" />
+
+                  {totalItems > 0 && (
+                    <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-[10px] font-bold leading-none text-black bg-amber-400 rounded-full transform translate-x-1/2 -translate-y-1/2">
+                      {totalItems}
+                    </span>
+                  )}
+                </Button>
+              </Link>
+              {/* Bouton Utilisateur */}
               <Button
-                key={index}
                 variant="ghost"
                 size="icon"
                 className="w-10 h-10 rounded-full hover:bg-zinc-800/50 transition-colors duration-300 bg-black"
               >
-                <Icon className="w-5 h-5 text-zinc-100 hover:text-amber-200 transition-colors duration-300" />
+                <User className="w-5 h-5 text-zinc-100 hover:text-amber-200 transition-colors duration-300" />
               </Button>
-            ))}
+            </div>
 
             {/* Menu Mobile */}
             <Sheet>

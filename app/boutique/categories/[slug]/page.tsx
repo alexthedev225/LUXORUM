@@ -9,7 +9,6 @@ type Category = {
   slug: string;
   position: string;
   longDescription: string;
-  imageHero?: string;
 };
 
 // Liste des catégories
@@ -21,7 +20,6 @@ const categories: Category[] = [
     position: "Collection Horlogerie",
     longDescription:
       "Notre collection de montres de luxe allie tradition horlogère et innovation technique...",
-    imageHero: "/categories/montres-hero.jpg",
   },
   {
     name: "Colliers",
@@ -29,7 +27,6 @@ const categories: Category[] = [
     slug: "colliers",
     position: "Collection Prestige",
     longDescription: "Une collection raffinée de colliers pour homme...",
-    imageHero: "/categories/colliers-hero.jpg",
   },
   {
     name: "Bagues",
@@ -38,7 +35,6 @@ const categories: Category[] = [
     position: "Collection Exclusive",
     longDescription:
       "Des bagues d'exception qui célèbrent l'art de la joaillerie masculine...",
-    imageHero: "/categories/bagues-hero.jpg",
   },
   {
     name: "Bracelets",
@@ -47,16 +43,6 @@ const categories: Category[] = [
     position: "Collection Signature",
     longDescription:
       "Une sélection de bracelets qui incarnent l'élégance masculine moderne...",
-    imageHero: "/categories/bracelets-hero.jpg",
-  },
-  {
-    name: "Accessoires",
-    description: "Pièces Uniques",
-    slug: "accessoires",
-    position: "Collection Privée",
-    longDescription:
-      "Des accessoires de luxe qui complètent votre style avec distinction. Boutons de manchette, pinces à cravate et autres raffinements, chaque pièce est un témoignage de notre savoir-faire.",
-    imageHero: "/categories/accessoires-hero.jpg",
   },
 ];
 

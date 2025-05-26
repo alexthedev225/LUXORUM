@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { Instagram, Twitter, Linkedin } from "lucide-react";
 import { motion } from "framer-motion";
+import { useIsAuthOrAdminPage } from "@/hooks/useIsAuthPage";
+
 
 export function Footer() {
   const fadeInUp = {
@@ -20,7 +22,9 @@ export function Footer() {
     navigation: ["Boutique", "Collections", "À propos", "Contact"],
     legal: ["Mentions légales", "CGV", "Politique de confidentialité", "FAQ"],
   };
+  const isAuthPage = useIsAuthOrAdminPage();
 
+  if (isAuthPage) return null;
   return (
     <footer className="bg-black pt-24 pb-12 rounded-t-3xl">
       {/* Navigation et liens */}

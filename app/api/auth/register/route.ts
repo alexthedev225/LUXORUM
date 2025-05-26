@@ -1,60 +1,125 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import connect from "@/lib/mongoose";  // ta connexion Mongoose
 import bcrypt from "bcryptjs";
+import { registerSchema } from "@/lib/validations/auth";
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
+import { verifyRecaptchaToken } from "@/lib/recaptcha";
+import { validateCsrfToken } from "@/lib/csrf";
 
-const prisma = new PrismaClient();
+import User from "@/models/User"; // <-- Import Mongoose model
+
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(5, "10 m"),
+});
 
 export async function POST(req: Request) {
   try {
-    const data = await req.json();
+    await connect(); 
+    const ip = req.headers.get("x-forwarded-for") ?? "127.0.0.1";
+    const userAgent = req.headers.get("user-agent") ?? "unknown";
+    const key = `${ip}-${userAgent}`;
 
-    if (!data.email || !data.username || !data.password) {
+    const { success, reset } = await ratelimit.limit(key);
+    if (!success) {
       return NextResponse.json(
-        {
-          error: "Données manquantes: email, username et password sont requis",
-        },
-        { status: 400 }
+        { message: "Trop de tentatives, réessayez plus tard", reset },
+        { status: 429 }
       );
     }
 
-    const existingUser = await prisma.user.findFirst({
-      where: {
-        OR: [{ email: data.email }, { username: data.username }],
-      },
-    });
+    const csrfTokenFromHeader = req.headers.get("x-csrf-token");
+    const csrfTokenFromCookie = req.headers
+      .get("cookie")
+      ?.split("; ")
+      .find((c) => c.startsWith("csrf-token="))
+      ?.split("=")[1];
+
+    if (!csrfTokenFromHeader || !csrfTokenFromCookie) {
+      return NextResponse.json(
+        { message: "Token CSRF manquant" },
+        { status: 403 }
+      );
+    }
+
+    if (!validateCsrfToken(csrfTokenFromHeader, csrfTokenFromCookie)) {
+      return NextResponse.json(
+        { message: "Token CSRF invalide" },
+        { status: 403 }
+      );
+    }
+
+    const body = await req.json();
+
+    if (!body.recaptchaToken) {
+      return NextResponse.json(
+        { message: "Token reCAPTCHA manquant" },
+        { status: 400 }
+      );
+    }
+    const isHuman = await verifyRecaptchaToken(body.recaptchaToken);
+    if (!isHuman) {
+      return NextResponse.json(
+        { message: "reCAPTCHA invalide ou suspect" },
+        { status: 403 }
+      );
+    }
+
+    const result = registerSchema.safeParse(body);
+    if (!result.success) {
+      const errors = result.error.errors.map((err) => ({
+        field: err.path.join("."),
+        message: err.message,
+      }));
+      return NextResponse.json({ errors }, { status: 400 });
+    }
+
+    const { email, username, password, firstName, lastName } = result.data;
+
+    // Vérification des doublons avec Mongoose
+    const existingUser = await User.findOne({
+      $or: [
+        { email: email.toLowerCase() },
+        { username: username.toLowerCase() },
+      ],
+    }).exec();
 
     if (existingUser) {
       return NextResponse.json(
-        { error: "Email ou nom d'utilisateur déjà utilisé" },
-        { status: 400 }
+        { message: "Un compte avec ces informations existe déjà." },
+        { status: 409 }
       );
     }
 
-    const hashedPassword = await bcrypt.hash(data.password, 10);
-    const user = await prisma.user.create({
-      data: {
-        email: data.email,
-        username: data.username,
-        password: hashedPassword,
-        firstName: data.firstName || null,
-        lastName: data.lastName || null,
-        profileImage: data.profileImage || null,
-      },
-      select: {
-        id: true,
-        email: true,
-        username: true,
-        role: true,
-        firstName: true,
-        lastName: true,
-        profileImage: true,
-      },
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    const newUser = new User({
+      email: email.toLowerCase(),
+      username: username.toLowerCase(),
+      password: hashedPassword,
+      firstName: firstName || null,
+      lastName: lastName || null,
     });
 
-    return NextResponse.json(user);
-  } catch (error) {
+    await newUser.save();
+
     return NextResponse.json(
-      { error: "Erreur lors de l'inscription" },
+      {
+        message: "Compte créé avec succès",
+        user: {
+          id: newUser._id,
+          email: newUser.email,
+          username: newUser.username,
+          role: newUser.role,
+        },
+      },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("Registration error:", error);
+    return NextResponse.json(
+      { message: "Erreur lors de l'inscription" },
       { status: 500 }
     );
   }

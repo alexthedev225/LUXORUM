@@ -1,0 +1,207 @@
+.auth-background {
+  background: linear-gradient(180deg, #000000 0%, #0a0a0a 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-background::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(212, 175, 55, 0.08) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.auth-container {
+  background: linear-gradient(
+    145deg,
+    rgba(10, 10, 10, 0.9) 0%,
+    rgba(0, 0, 0, 0.95) 100%
+  );
+  border: 1px solid rgba(212, 175, 55, 0.1);
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.3),
+    inset 0 0 20px rgba(212, 175, 55, 0.025);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  transform-style: preserve-3d;
+}
+
+.auth-input {
+  background: rgba(20, 20, 20, 0.95);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  color: rgba(255, 255, 255, 0.9); /* Texte lumineux */
+  transition: all 0.3s ease;
+}
+
+.auth-input:focus {
+  border-color: rgba(212, 175, 55, 0.6);
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.15),
+    0 0 15px rgba(212, 175, 55, 0.15);
+  background: rgba(25, 25, 25, 0.95);
+}
+
+.auth-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.auth-label {
+  font-family: "Cinzel", serif;
+  color: rgba(212, 175, 55, 0.9); /* Or lumineux */
+  font-size: 0.875rem;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+
+.auth-button {
+  background: linear-gradient(
+    45deg,
+    rgba(212, 175, 55, 1) 0%,
+    rgba(255, 215, 0, 1) 50%,
+    rgba(212, 175, 55, 1) 100%
+  );
+  color: #1a1a1a; /* Texte sombre sur fond doré */
+  font-family: "Cinzel", serif;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.2),
+    0 2px 5px rgba(212, 175, 55, 0.1);
+}
+
+.auth-button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    45deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.auth-button:hover::before {
+  transform: translateX(100%);
+}
+
+.auth-divider {
+  position: relative;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(212, 175, 55, 0.15),
+    transparent
+  );
+  color: rgba(212, 175, 55, 0.6);
+}
+
+.auth-social-button {
+  background: rgba(15, 15, 15, 0.9);
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  transition: all 0.3s ease;
+}
+
+.auth-social-button:hover {
+  border-color: rgba(212, 175, 55, 0.3);
+  background: rgba(20, 20, 20, 0.9);
+  transform: translateY(-1px);
+}
+
+.auth-error {
+  background: rgba(220, 38, 38, 0.1);
+  color: rgba(255, 165, 165, 0.9); /* Rouge plus lumineux */
+  border: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+.auth-hint {
+  color: rgba(255, 255, 255, 0.6); /* Texte d'aide subtil mais lisible */
+  font-size: 0.875rem;
+}
+
+.auth-link {
+  color: rgba(255, 215, 0, 0.9); /* Or brillant */
+  transition: all 0.3s ease;
+}
+
+.auth-link:hover {
+  color: rgba(255, 215, 0, 1);
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.auth-subtitle {
+  color: rgba(212, 175, 55, 0.7); /* Or atténué */
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+}
+
+.auth-button-secondary {
+  background: rgba(212, 175, 55, 0.1);
+  color: rgba(212, 175, 55, 0.9);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.auth-button-secondary:hover {
+  background: rgba(212, 175, 55, 0.15);
+  border-color: rgba(212, 175, 55, 0.4);
+}
+
+/* Ajout des styles spécifiques pour le formulaire de luxe */
+.form-input-luxury {
+  @apply bg-zinc-900/50 
+         border-zinc-800 
+         focus:border-amber-200/50 
+         text-zinc-100 
+         h-12 
+         rounded-lg 
+         transition-all 
+         duration-300;
+}
+
+.btn-luxury {
+  @apply bg-gradient-to-r 
+         from-amber-200 
+         to-amber-100 
+         text-zinc-900 
+         font-medium 
+         rounded-lg 
+         transform 
+         transition-all 
+         duration-300 
+         hover:scale-[1.02] 
+         hover:shadow-xl 
+         hover:shadow-amber-200/10;
+}
+
+/* Ajout d'effets de brillance subtils */
+.luxury-container {
+  @apply relative 
+         before:absolute 
+         before:inset-0 
+         before:bg-gradient-to-b 
+         before:from-amber-200/5 
+         before:to-transparent 
+         before:opacity-20;
+}
+
+.auth-text-primary {
+  color: rgba(255, 255, 255, 0.9); /* Texte principal lumineux */
+}
+
+.auth-text-secondary {
+  color: rgba(255, 255, 255, 0.7); /* Texte secondaire */
+}

@@ -1,102 +1,168 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { withAuth } from "@/utils/withAuth";
+import Cart from "@/models/Cart";
+import Product from "@/models/Product";
+import connect from "@/lib/mongoose";  // ta fonction connect
 
-const prisma = new PrismaClient();
 
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const userId = searchParams.get("userId");
+    await connect();
 
-  if (!userId) {
-    return NextResponse.json({ error: "UserId requis" }, { status: 400 });
-  }
+  return withAuth(req, async (_req, user) => {
+    try {
+      // Chercher le panier utilisateur, peupler les produits dans items
+      const cart = await Cart.findOne({ userId: user.userId }).populate(
+        "items.product"
+      );
 
-  try {
-    const cart = await prisma.cart.findUnique({
-      where: { userId },
-      include: {
-        items: {
-          // Utilise la relation CartItem[]
-          include: {
-            product: true, // Utilise la relation Product
-          },
-        },
-      },
-    });
+      if (!cart) {
+        return NextResponse.json({ items: [] });
+      }
 
-    return NextResponse.json(cart || { items: [] });
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Erreur lors de la récupération du panier" },
-      { status: 500 }
-    );
-  }
+      return NextResponse.json(cart);
+    } catch (error) {
+      console.error("Erreur GET /api/cart:", error);
+      return NextResponse.json({ message: "Erreur serveur" }, { status: 500 });
+    }
+  });
 }
 
 export async function POST(req: Request) {
-  try {
-    const data = await req.json();
+    await connect();
 
-    if (!data.userId || !data.productId || typeof data.quantity !== "number") {
-      return NextResponse.json(
-        {
-          error:
-            "Données manquantes ou invalides: userId, productId et quantity (nombre) sont requis",
-        },
-        { status: 400 }
-      );
+  return withAuth(req, async (req, user) => {
+    try {
+      const body = await req.json();
+      const { productId, quantity } = body;
+
+      if (!productId || !quantity || quantity < 1) {
+        return NextResponse.json(
+          { message: "Données invalides" },
+          { status: 400 }
+        );
+      }
+
+      // Vérifier que le produit existe
+      const product = await Product.findById(productId);
+      if (!product) {
+        return NextResponse.json(
+          { message: "Produit non trouvé" },
+          { status: 404 }
+        );
+      }
+
+      // Chercher panier existant
+      let cart = await Cart.findOne({ userId: user.userId });
+
+      if (!cart) {
+        // Créer panier si inexistant
+        cart = new Cart({
+          userId: user.userId,
+          items: [{ product: productId, quantity }],
+        });
+      } else {
+        // Vérifier si produit déjà dans panier
+        const index = cart.items.findIndex(
+          (item) => item.product.toString() === productId
+        );
+        if (index > -1) {
+          // Incrémenter quantité
+          cart.items[index].quantity += quantity;
+        } else {
+          // Ajouter nouveau produit
+          cart.items.push({ product: productId, quantity });
+        }
+      }
+
+      await cart.save();
+      return NextResponse.json(cart);
+    } catch (error) {
+      console.error("Erreur POST /api/cart:", error);
+      return NextResponse.json({ message: "Erreur serveur" }, { status: 500 });
     }
+  });
+}
 
-    // Vérification que la quantité est positive
-    if (data.quantity <= 0) {
-      return NextResponse.json(
-        {
-          error: "La quantité doit être supérieure à 0",
-        },
-        { status: 400 }
-      );
+export async function PUT(req: Request) {
+    await connect();
+
+  return withAuth(req, async (req, user) => {
+    try {
+      const body = await req.json();
+      const { items } = body;
+
+      if (!Array.isArray(items)) {
+        return NextResponse.json(
+          { message: "Données invalides" },
+          { status: 400 }
+        );
+      }
+
+      // Valider chaque item
+      for (const item of items) {
+        if (
+          !item.productId ||
+          typeof item.quantity !== "number" ||
+          item.quantity < 0
+        ) {
+          return NextResponse.json(
+            { message: "Données invalides dans les items" },
+            { status: 400 }
+          );
+        }
+
+        // Vérifier produit existe (optionnel mais recommandé)
+        const prod = await Product.findById(item.productId);
+        if (!prod) {
+          return NextResponse.json(
+            { message: `Produit ${item.productId} non trouvé` },
+            { status: 404 }
+          );
+        }
+      }
+
+      let cart = await Cart.findOne({ userId: user.userId });
+      if (!cart) {
+        return NextResponse.json(
+          { message: "Panier non trouvé" },
+          { status: 404 }
+        );
+      }
+
+      // Remplacer les items par ceux reçus
+      cart.items = items.map((item) => ({
+        product: item.productId,
+        quantity: item.quantity,
+      }));
+
+      await cart.save();
+      return NextResponse.json(cart);
+    } catch (error) {
+      console.error("Erreur PUT /api/cart:", error);
+      return NextResponse.json({ message: "Erreur serveur" }, { status: 500 });
     }
+  });
+}
 
-    // Vérification que le produit existe
-    const product = await prisma.product.findUnique({
-      where: { id: data.productId },
-    });
+export async function DELETE(req: Request) {
+    await connect();
 
-    if (!product) {
-      return NextResponse.json(
-        {
-          error: "Produit non trouvé",
-        },
-        { status: 404 }
-      );
+  return withAuth(req, async (_req, user) => {
+    try {
+      const cart = await Cart.findOne({ userId: user.userId });
+      if (!cart) {
+        return NextResponse.json(
+          { message: "Panier non trouvé" },
+          { status: 404 }
+        );
+      }
+
+      cart.items = [];
+      await cart.save();
+      return NextResponse.json({ message: "Panier vidé" });
+    } catch (error) {
+      console.error("Erreur DELETE /api/cart:", error);
+      return NextResponse.json({ message: "Erreur serveur" }, { status: 500 });
     }
-
-    let cart = await prisma.cart.findUnique({
-      where: { userId: data.userId },
-    });
-
-    if (!cart) {
-      cart = await prisma.cart.create({
-        data: { userId: data.userId },
-      });
-    }
-
-    const cartItem = await prisma.cartItem.create({
-      data: {
-        cartId: cart.id,
-        productId: data.productId,
-        quantity: data.quantity,
-      },
-      include: {
-        product: true,
-      },
-    });
-
-    return NextResponse.json(cartItem);
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Erreur lors de l'ajout au panier" },
-      { status: 500 }
-    );
-  }
+  });
 }

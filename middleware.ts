@@ -1,133 +1,96 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { verifyAuth } from "./lib/auth";
-import { checkRateLimit } from "./lib/rateLimit";
-import { checkPermissions } from "./lib/rbac";
-import { getSession } from "./lib/session";
+import { NextRequest, NextResponse } from "next/server";
+import * as jose from "jose";
 
-export async function middleware(request: NextRequest) {
-  const path = request.nextUrl.pathname;
-  const token = request.cookies.get("token")?.value;
-  const sessionId = request.cookies.get("sessionId")?.value;
+// Assurez-vous que cette variable est définie dans vos variables d'environnement
+const SECRET = process.env.JWT_SECRET!;
 
-  // CSRF Protection pour les requêtes POST/PUT/PATCH/DELETE
-  if (["POST", "PUT", "PATCH", "DELETE"].includes(request.method)) {
-    const csrfToken = request.headers.get("x-csrf-token");
-    const storedToken = request.cookies.get("csrf-token")?.value;
+function setSecurityHeaders(res: NextResponse) {
+  const csp = `
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' https://js.stripe.com;
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data:;
+    connect-src 'self' https://api.stripe.com;
+    font-src 'self';
+    frame-src https://js.stripe.com;
+  `.replace(/\n/g, "");
 
-    if (!csrfToken || !storedToken || csrfToken !== storedToken) {
-      return NextResponse.json(
-        { error: "Token CSRF invalide" },
-        { status: 403 }
+  res.headers.set("Content-Security-Policy", csp);
+  res.headers.set("X-Frame-Options", "DENY");
+  res.headers.set("X-Content-Type-Options", "nosniff");
+  res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.headers.set(
+    "Strict-Transport-Security",
+    "max-age=63072000; includeSubDomains; preload"
+  );
+
+  return res;
+}
+
+export async function middleware(req: NextRequest) {
+ const { pathname, protocol } = req.nextUrl;
+
+ // Forcer HTTPS uniquement en production
+ if (
+   process.env.NODE_ENV === "production" &&
+   req.headers.get("x-forwarded-proto") === "http"
+ ) {
+   const httpsUrl = new URL(req.url);
+   httpsUrl.protocol = "https:";
+   return setSecurityHeaders(NextResponse.redirect(httpsUrl, 301));
+ }
+
+ console.log("Middleware exécuté pour le chemin:", pathname);
+
+  // Protéger uniquement les routes admin
+  if (pathname.startsWith("/admin")) {
+    const token = req.cookies.get("token")?.value;
+
+    console.log("Token trouvé:", token ? "Oui" : "Non");
+
+    if (!token) {
+      console.log("Aucun token trouvé, redirection vers login");
+      return setSecurityHeaders(
+        NextResponse.redirect(new URL("/auth/login", req.url))
       );
     }
-  }
 
-  // Rate limiting
-  const ip = request.ip || "anonymous";
-  const rateLimit = await checkRateLimit(ip);
+    try {
+      console.log("Tentative de vérification du token avec jose");
 
-  if (!rateLimit.success) {
-    return NextResponse.json(
-      { error: "Trop de requêtes, veuillez réessayer plus tard" },
-      { status: 429 }
-    );
-  }
+      // Utilisation de jose pour vérifier le token
+      const { payload } = await jose.jwtVerify(
+        token,
+        new TextEncoder().encode(SECRET)
+      );
 
-  // Public routes
-  const publicRoutes = ["/login", "/register", "/", "/products"];
-  if (publicRoutes.includes(path)) {
-    return NextResponse.next();
-  }
+      console.log("Token décodé:", JSON.stringify(payload, null, 2));
 
-  // API routes that don't need auth
-  if (path.startsWith("/api/auth/") || path.startsWith("/api/products")) {
-    return NextResponse.next();
-  }
+      // TypeScript ne reconnaît pas automatiquement les propriétés du payload
+      const userRole = payload.role as string;
+      console.log("Rôle trouvé:", userRole);
 
-  // Check auth for all other routes
-  if (!token || !sessionId) {
-    if (path.startsWith("/api/")) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
-
-  try {
-    const verifiedToken = await verifyAuth(token);
-    const session = await getSession(sessionId);
-
-    if (!session) {
-      if (path.startsWith("/api/")) {
-        return NextResponse.json(
-          { error: "Session invalide" },
-          { status: 401 }
-        );
+      if (userRole !== "ADMIN") {
+        console.log("Accès refusé: rôle non-admin détecté:", userRole);
+        return setSecurityHeaders(NextResponse.redirect(new URL("/", req.url)));
       }
-      return NextResponse.redirect(new URL("/login", request.url));
-    }
 
-    // Vérification des permissions basée sur le chemin
-    const pathPermissions: Record<string, string[]> = {
-      "/admin/products": ["write:products"],
-      "/admin/users": ["manage:users"],
-      "/admin/orders": ["read:orders", "update:orders"],
-      "/admin/stats": ["view:statistics"],
-      "/admin/inventory": ["manage:inventory"],
-    };
-
-    const requiredPermissions = Object.entries(pathPermissions).find(([path]) =>
-      request.nextUrl.pathname.startsWith(path)
-    )?.[1];
-
-    if (
-      requiredPermissions &&
-      !checkPermissions(verifiedToken.role, requiredPermissions)
-    ) {
-      return NextResponse.json(
-        { error: "Permission insuffisante" },
-        { status: 403 }
+      console.log("Accès autorisé pour l'admin");
+      // ✅ Accès autorisé
+      return setSecurityHeaders(NextResponse.next());
+    } catch (err) {
+      // Token invalide ou expiré
+      console.error("Erreur lors de la vérification du token:", err);
+      return setSecurityHeaders(
+        NextResponse.redirect(new URL("/auth/login", req.url))
       );
     }
-
-    // Admin routes protection
-    if (path.startsWith("/admin") && verifiedToken.role !== "ADMIN") {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
-
-    // Add session info to request headers
-    const requestHeaders = new Headers(request.headers);
-    requestHeaders.set(
-      "user",
-      JSON.stringify({
-        id: session.userId,
-        role: session.role,
-      })
-    );
-
-    return NextResponse.next({
-      request: {
-        headers: requestHeaders,
-      },
-    });
-  } catch {
-    if (path.startsWith("/api/")) {
-      return NextResponse.json(
-        { error: "Token ou session invalide" },
-        { status: 401 }
-      );
-    }
-    return NextResponse.redirect(new URL("/login", request.url));
   }
+
+  // ✅ Pour toutes les autres routes
+  return setSecurityHeaders(NextResponse.next());
 }
 
 export const config = {
-  matcher: [
-    // Routes protégées
-    "/admin/:path*",
-    "/api/:path*",
-    "/profile/:path*",
-    "/checkout/:path*",
-    "/cart/:path*",
-  ],
+  matcher: ["/admin/:path*"],
 };

@@ -1,16 +1,22 @@
 import { ProductDetails } from "@/components/sections/boutique/ProductDetails";
-import { products } from "@/data/products";
 import { notFound } from "next/navigation";
 
 type Props = {
-  params: {
-    id: string;
-  };
+  params: { id: string };
 };
 
-export function generateMetadata({ params }: Props) {
-  const product = products.find((p) => p.id === parseInt(params.id));
-  if (!product) return { title: "Produit non trouvé | LUXORUM" };
+const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
+
+export async function generateMetadata({ params }: Props) {
+  const res = await fetch(`${BASE_URL}/api/products/${params.id}`, {
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    return { title: "Produit non trouvé | LUXORUM" };
+  }
+
+  const product = await res.json();
 
   return {
     title: `${product.name} | LUXORUM`,
@@ -18,9 +24,14 @@ export function generateMetadata({ params }: Props) {
   };
 }
 
-export default function ProductPage({ params }: Props) {
-  const product = products.find((p) => p.id === parseInt(params.id));
-  if (!product) return notFound();
+export default async function ProductPage({ params }: Props) {
+  const res = await fetch(`${BASE_URL}/api/products/${params.id}`, {
+    cache: "no-store",
+  });
+
+  if (!res.ok) return notFound();
+
+  const product = await res.json();
 
   return <ProductDetails product={product} />;
 }

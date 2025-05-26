@@ -2,65 +2,81 @@ import { NextResponse } from "next/server";
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import { cacheGet, cacheSet, cacheDelete } from "@/lib/redis";
-import { prisma } from "@/lib/prisma";
+import Product, { IProduct } from "@/models/Product";
+import "@/models/Category"; // Assure-toi que ce chemin est correct selon ta structure
+import dbConnect from "@/lib/mongoose";
+import { ProjectionType } from "mongoose";
 
 export async function GET(req: Request) {
+  await dbConnect();
   const { searchParams } = new URL(req.url);
+
   const page = parseInt(searchParams.get("page") || "1");
-  const limit = parseInt(searchParams.get("limit") || "10");
-  const category = searchParams.get("category");
+  const limit = parseInt(searchParams.get("limit") || "20");
   const search = searchParams.get("search");
-  const fields = searchParams.get("fields")?.split(",") || [
-    "id",
+  const category = searchParams.get("category") || undefined;
+  const skip = (page - 1) * limit;
+
+  // Tous les champs nécessaires au front
+  const ALLOWED_FIELDS = [
+    "_id",
     "name",
+    "description",
     "price",
     "stock",
+    "images",
+    "category",
+    "specifications",
+    "discount",
+    "createdAt",
+    "updatedAt",
   ];
 
-  const skip = (page - 1) * limit;
+  // Pour afficher tout ce dont le front a besoin, on force ici la projection complète
+  // Sinon on peut garder la logique du paramètre fields si tu veux filtrer côté client
+  const fields = [
+    "_id",
+    "name",
+    "description",
+    "price",
+    "stock",
+    "images",
+    "category",
+    "specifications",
+    "discount",
+    "createdAt",
+    "updatedAt",
+  ];
+
+  const projection = Object.fromEntries(
+    fields.map((f) => [f, 1])
+  ) as ProjectionType<IProduct>;
+
   const cacheKey = `products:${category || "all"}:${page}:${limit}:${
     search || ""
   }:${fields.join(",")}`;
 
   try {
     const cached = await cacheGet(cacheKey);
-    if (cached) {
-      return NextResponse.json(cached);
+    if (cached) return NextResponse.json(cached);
+
+    const filter: Record<string, any> = {};
+    if (category) filter.category = category;
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+      ];
     }
 
-    const select = fields.reduce(
-      (acc, field) => ({ ...acc, [field]: true }),
-      {}
-    );
-
+    // Récupération avec population de category (seulement _id et name)
     const [products, total] = await Promise.all([
-      prisma.product.findMany({
-        where: {
-          AND: [
-            category ? { categoryId: category } : {},
-            search
-              ? {
-                  OR: [
-                    { name: { contains: search, mode: "insensitive" } },
-                    { description: { contains: search, mode: "insensitive" } },
-                  ],
-                }
-              : {},
-          ],
-        },
-        select: {
-          ...select,
-          category: {
-            select: { id: true, name: true },
-          },
-        },
-        skip,
-        take: limit,
-        orderBy: { createdAt: "desc" },
-      }),
-      prisma.product.count({
-        where: category ? { categoryId: category } : {},
-      }),
+      Product.find(filter, projection)
+        .populate("category", "name _id")
+        .skip(skip)
+        .limit(limit)
+        .sort({ createdAt: -1 }),
+      Product.countDocuments(filter),
     ]);
 
     const result = {
@@ -74,9 +90,10 @@ export async function GET(req: Request) {
       },
     };
 
-    await cacheSet(cacheKey, result, 300);
+    await cacheSet(cacheKey, result, 300); // cache 5 minutes
     return NextResponse.json(result);
   } catch (error) {
+    console.error("❌ GET /api/products error:", error);
     return NextResponse.json(
       { error: "Erreur lors de la récupération des produits" },
       { status: 500 }
@@ -85,25 +102,28 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  await dbConnect();
+  // console.log("▶️ [API] POST /api/products - Début du traitement"); // décommenter si debug
+
   try {
     const formData = await req.formData();
+
     const data = {
       name: String(formData.get("name")),
       description: String(formData.get("description")),
       price: Number(formData.get("price")),
-      stock: Number(formData.get("stock")) || 0,
-      categoryId: String(formData.get("categoryId")),
+      stock: Number(formData.get("stock") || 0),
+      category: String(formData.get("categoryId")),
       specifications: formData.get("specifications")
         ? JSON.parse(String(formData.get("specifications")))
         : null,
     };
 
-    // Validation
-    if (!data.name || !data.description || !data.price || !data.categoryId) {
+    if (!data.name || !data.description || !data.price || !data.category) {
       return NextResponse.json(
         {
           error:
-            "Données manquantes: name, description, price et categoryId sont requis",
+            "Données manquantes : name, description, price et categoryId sont requis",
         },
         { status: 400 }
       );
@@ -111,48 +131,38 @@ export async function POST(req: Request) {
 
     const images: string[] = [];
     const imageFiles = formData.getAll("images");
-
-    // Les images sont stockées physiquement dans le dossier public/uploads/products
     const uploadDir = path.join(process.cwd(), "public", "uploads", "products");
 
     for (const imageFile of imageFiles) {
-      if (typeof imageFile === "object" && "arrayBuffer" in imageFile) {
-        try {
-          await mkdir(uploadDir, { recursive: true });
-
-          const buffer = Buffer.from(await (imageFile as Blob).arrayBuffer());
-          const fileName = `${Date.now()}-${(imageFile as File).name.replace(
-            /[^a-zA-Z0-9.]/g,
-            "_"
-          )}`;
-          const filePath = path.join(uploadDir, fileName);
-
-          await writeFile(filePath, buffer);
-
-          // Seul le chemin d'accès est stocké dans la base de données
-          images.push(`/uploads/products/${fileName}`);
-        } catch (uploadError) {
-          console.error("Erreur upload image:", uploadError);
-        }
+      // Vérifie que l'élément est un fichier (Blob)
+      if (imageFile instanceof Blob) {
+        await mkdir(uploadDir, { recursive: true });
+        const buffer = Buffer.from(await imageFile.arrayBuffer());
+        const fileName = `${Date.now()}-${(imageFile as File).name.replace(
+          /[^a-zA-Z0-9.]/g,
+          "_"
+        )}`;
+        const filePath = path.join(uploadDir, fileName);
+        await writeFile(filePath, buffer);
+        images.push(`/uploads/products/${fileName}`);
       }
     }
 
-    const product = await prisma.product.create({
-      data: {
-        ...data,
-        images,
-      },
-      include: { category: true },
+    const product = await Product.create({
+      ...data,
+      images,
     });
 
-    // Invalider les caches concernés
+    // Supprime les caches qui peuvent être invalides
     await Promise.all([
       cacheDelete("products:all"),
-      cacheDelete(`products:${product.categoryId}`),
+      cacheDelete(`products:${product.category}`),
+      // éventuellement, si tu as d'autres clés de cache spécifiques, les supprimer aussi
     ]);
 
     return NextResponse.json(product);
   } catch (error) {
+    console.error("❌ Erreur serveur:", error);
     return NextResponse.json(
       { error: "Erreur lors de la création du produit" },
       { status: 500 }

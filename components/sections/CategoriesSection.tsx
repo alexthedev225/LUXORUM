@@ -7,39 +7,29 @@ const categories = [
   {
     name: "Montres",
     description: "Chronographes & Automatiques",
-    href: "/categories/montres",
+    href: "/boutique/categories/montres",
     position: "Collection Horlogerie",
   },
   {
     name: "Colliers",
     description: "Chaînes & Pendentifs",
-    href: "/categories/colliers",
+    href: "/boutique/categories/colliers",
     position: "Collection Prestige",
   },
   {
     name: "Bagues",
     description: "Chevalières & Alliances",
-    href: "/categories/bagues",
+    href: "/boutique/categories/bagues",
     position: "Collection Exclusive",
   },
-  {
-    name: "Lunettes",
-    description: "Optique & Solaire",
-    href: "/categories/lunettes",
-    position: "Collection Élégance",
-  },
+  
   {
     name: "Bracelets",
     description: "Joncs & Mailles",
-    href: "/categories/bracelets",
+    href: "/boutique/categories/bracelets",
     position: "Collection Signature",
   },
-  {
-    name: "Accessoires",
-    description: "Pièces Uniques",
-    href: "/categories/accessoires",
-    position: "Collection Privée",
-  },
+  
 ];
 
 export function CategoriesSection() {
@@ -70,7 +60,7 @@ export function CategoriesSection() {
           </motion.h2>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-zinc-800/30 rounded-2xl overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-px bg-zinc-800/30 rounded-2xl overflow-hidden">
           {categories.map((category, i) => (
             <motion.div
               key={category.name}

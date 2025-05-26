@@ -176,6 +176,7 @@
   }
 }
 
+
 .animate-gradient-slow {
   animation: gradient-slow 15s ease infinite;
 }
