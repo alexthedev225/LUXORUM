@@ -1,11 +1,11 @@
 import { HeroBoutiqueSection } from "@/components/sections/boutique/HeroBoutiqueSection";
-import { ProductGrid } from "@/components/sections/boutique/ProductGrid";
+import ProductGridWrapper from "@/components/sections/boutique/ProductGridWrapper";
 
 export default function BoutiquePage() {
   return (
-    <div className="space-y-16 pb-16">
+    <div className="space-y-2 pb-16">
       <HeroBoutiqueSection />
-      <ProductGrid />
+      <ProductGridWrapper />
     </div>
   );
 }

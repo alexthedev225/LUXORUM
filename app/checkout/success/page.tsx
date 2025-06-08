@@ -2,14 +2,21 @@
 
 import { motion } from "framer-motion";
 import { Check, Sparkles } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useCartStore } from "@/stores/cart";
+import { useEffect } from "react";
 
-export default function CheckoutSuccessPage({
-  searchParams,
-}: {
-  searchParams: { session_id: string };
-}) {
+export default function CheckoutSuccessPage() {
+  const searchParams = useSearchParams();
+  const sessionId = searchParams.get("session_id");
+  const { clearCart } = useCartStore();
+
+  useEffect(() => {
+    clearCart();
+  }, [clearCart]);
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black via-zinc-950 to-black relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-b from-black via-zinc-950 to-black relative overflow-hidden rounded-2xl mb-2">
       {/* Overlay décoratif pointillé */}
       <div className="absolute inset-0 bg-[radial-gradient(#ffffff11_1px,transparent_1px)] bg-[size:20px_20px]" />
 
@@ -114,7 +121,7 @@ export default function CheckoutSuccessPage({
                 Transaction
               </p>
               <p className="text-sm text-amber-300/90 font-mono break-all">
-                {searchParams.session_id}
+                {sessionId ?? "Aucune"}
               </p>
             </div>
 

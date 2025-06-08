@@ -4,6 +4,7 @@ import { ProductGrid } from "@/components/sections/boutique/ProductGrid";
 
 // Types
 type Category = {
+  _id: string;
   name: string;
   description: string;
   slug: string;
@@ -11,69 +12,79 @@ type Category = {
   longDescription: string;
 };
 
-// Liste des catégories
-const categories: Category[] = [
-  {
-    name: "Montres",
-    description: "Chronographes & Automatiques",
-    slug: "montres",
-    position: "Collection Horlogerie",
-    longDescription:
-      "Notre collection de montres de luxe allie tradition horlogère et innovation technique...",
-  },
-  {
-    name: "Colliers",
-    description: "Chaînes & Pendentifs",
-    slug: "colliers",
-    position: "Collection Prestige",
-    longDescription: "Une collection raffinée de colliers pour homme...",
-  },
-  {
-    name: "Bagues",
-    description: "Chevalières & Alliances",
-    slug: "bagues",
-    position: "Collection Exclusive",
-    longDescription:
-      "Des bagues d'exception qui célèbrent l'art de la joaillerie masculine...",
-  },
-  {
-    name: "Bracelets",
-    description: "Joncs & Mailles",
-    slug: "bracelets",
-    position: "Collection Signature",
-    longDescription:
-      "Une sélection de bracelets qui incarnent l'élégance masculine moderne...",
-  },
-];
+type Product = {
+  _id: string;
+  name: string;
+  description?: string;
+  price: number;
+  images: string[];
+  category: Category | string;
+};
 
-// Props du composant
 type Props = {
   params: { slug: string };
 };
 
-// Génération des métadonnées
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const category = categories.find((cat) => cat.slug === params.slug);
 
-  if (!category) {
-    return {
-      title: "Catégorie non trouvée | LUXORUM",
-    };
-  }
 
-  return {
-    title: `${category.name} - ${category.position} | LUXORUM`,
-    description: category.description,
-  };
+// Fetch dynamique des catégories
+async function fetchCategories(): Promise<Category[]> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/categories`,
+    {
+      cache: "no-store",
+    }
+  );
+  if (!res.ok) throw new Error("Erreur chargement catégories");
+  return res.json();
+}
+async function fetchAllProducts(): Promise<Product[]> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/products/all`,
+    { cache: "no-store" }
+  );
+  if (!res.ok) throw new Error("Erreur chargement produits");
+
+  const data = await res.json();
+  console.log("fetchAllProducts data:", data); // pour debug
+
+  return data.products; // <-- ici on retourne le tableau !
 }
 
-// Composant principal
-export default function CategoryPage({ params }: Props) {
-  const category = categories.find((cat) => cat.slug === params.slug);
 
-  if (!category) {
-    notFound();
+export default async function CategoryPage({ params }: Props) {
+  console.log("CategoryPage params.slug:", params.slug);
+
+  function slugify(str: string) {
+    return str
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/[^\w-]+/g, "")
+      .replace(/--+/g, "-")
+      .replace(/^-+|-+$/g, "");
   }
+
+  // Récupère les catégories depuis l'API
+  const categories = await fetchCategories();
+  console.log("categories:", categories);
+
+  // Recherche la catégorie dont le nom slugifié correspond au paramètre slug
+  const category = categories.find((cat) => {
+    const slugifiedName = slugify(cat.name);
+    console.log(
+      "Comparaison slug:",
+      slugifiedName,
+      "avec params.slug:",
+      params.slug
+    );
+    return slugifiedName === params.slug;
+  });
+
+  if (!category) notFound();
+
+  const allProducts = await fetchAllProducts();
 
   return (
     <div className="space-y-16 pb-16">
@@ -104,9 +115,14 @@ export default function CategoryPage({ params }: Props) {
         </div>
       </section>
 
-      {/* Grille de produits filtrée par catégorie */}
+      {/* ProductGrid reçoit tout, il filtre côté client */}
       <section className="container mx-auto px-6">
-        <ProductGrid defaultCategory={category.name} />
+        <ProductGrid
+          categories={categories}
+          allProducts={allProducts}
+          defaultCategory={category.name}
+          showCategoryButtons={false} // Affiche les boutons de catégorie
+        />
       </section>
     </div>
   );

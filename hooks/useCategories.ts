@@ -1,36 +1,40 @@
-import { useEffect, useState } from "react";
+// /hooks/useCategories.ts
+import { useState, useEffect } from "react";
 
-export type Category = {
-  id: string;
+export interface Category {
+  _id: string;
   name: string;
-  description?: string | null;
-  slug: string;
-  position: string;
-  longDescription: string;
-};
+}
+
+// Cache simple côté module pour éviter rechargements inutiles
+let cachedCategories: Category[] | null = null;
 
 export function useCategories() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [categories, setCategories] = useState<Category[]>(
+    cachedCategories ?? []
+  );
+  const [loading, setLoading] = useState(!cachedCategories);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    if (cachedCategories) return;
+
+    (async () => {
+      setLoading(true);
+      setError(null);
       try {
         const res = await fetch("/api/categories");
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`Erreur HTTP ${res.status}`);
         const data: Category[] = await res.json();
+        cachedCategories = data;
         setCategories(data);
-      } catch (error) {
-        console.error("Erreur lors du chargement des catégories :", error);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Erreur inconnue");
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
-    };
-
-    fetchCategories();
+    })();
   }, []);
 
-  return { categories, isLoading };
+  return { categories, loading, error };
 }

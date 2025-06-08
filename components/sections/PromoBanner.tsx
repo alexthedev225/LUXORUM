@@ -57,7 +57,7 @@ export function PromoBanner() {
                        uppercase tracking-widest text-sm font-light
                        transition-all duration-500"
             >
-              <Link href="/collections">
+              <Link href="/boutique">
                 <span className="relative z-10">Découvrir</span>
                 <div
                   className="absolute inset-0 opacity-0 group-hover:opacity-100 

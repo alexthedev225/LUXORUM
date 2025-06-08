@@ -27,13 +27,13 @@ const contactDetails = [
   {
     icon: Phone,
     label: "Téléphone",
-    value: "+33 1 23 45 67 89",
-    href: "tel:+33123456789",
+    value: "+225 01 23 45 67 89",
+    href: "tel:+225 0123456789",
   },
   {
     icon: MapPin,
     label: "Adresse",
-    value: "8 Place Vendôme, 75001 Paris",
+    value: "8 Place Vendôme, 00225 Abidjan, Côte d'Ivoire",
     multiline: true,
   },
 ];

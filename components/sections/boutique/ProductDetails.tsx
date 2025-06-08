@@ -101,7 +101,7 @@ export function ProductDetails({ product }: Props) {
     : product.price;
 
   return (
-    <section className="mb-10 rounded-2xl min-h-screen py-16 bg-gradient-to-b from-black via-zinc-950 to-black relative overflow-hidden">
+    <section className="mb-10 rounded-2xl min-h-screen py-30 bg-gradient-to-b from-black via-zinc-950 to-black relative overflow-hidden">
       {/* Particules d'animation */}
       <AnimatePresence>
         {particles.map((particle) => (
@@ -380,7 +380,7 @@ export function ProductDetails({ product }: Props) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
               >
-                <p className="text-lg text-zinc-300/90 leading-relaxed font-light">
+                <p className="text-lg text-zinc-300/90 leading-relaxed font-light ">
                   {product.description}
                 </p>
 
@@ -587,20 +587,7 @@ export function ProductDetails({ product }: Props) {
                   </Button>
                 </motion.div>
 
-                {/* Bouton achat immédiat */}
-                {product.stock > 0 && (
-                  <motion.div
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <Button
-                      variant="outline"
-                      className="w-full h-12 border-amber-400/30 text-amber-400 hover:bg-amber-400/10 hover:border-amber-400/50 transition-all duration-300"
-                    >
-                      Acheter maintenant
-                    </Button>
-                  </motion.div>
-                )}
+                
               </motion.div>
             </motion.div>
           </div>

@@ -181,9 +181,10 @@ const StripeTestCards: React.FC = () => {
                 SÉCURITÉ
               </span>
             </div>
-            <p className="text-zinc-400/90 text-xs leading-relaxed">
-              Ces cartes de test ne fonctionnent qu'en mode développement. Aucun
-              paiement réel ne sera effectué.
+            <p className="text-zinc-200/90 text-xs leading-relaxed">
+              Les cartes de test ci-dessous sont fournies à des fins de
+              démonstration uniquement. Aucun paiement réel ne sera effectué.
+              Cette boutique fonctionne actuellement en mode test.
             </p>
           </motion.div>
         </div>

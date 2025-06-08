@@ -23,6 +23,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { loadStripe } from "@stripe/stripe-js";
 import StripeTestCards from "./components/StripeTestCards";
+import Link from "next/link";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
@@ -198,10 +199,10 @@ const CartPage = () => {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-black via-zinc-950 to-black">
+      <div className="min-h-screen bg-gradient-to-b from-black via-zinc-950 to-black rounded-2xl mb-2 flex items-center justify-center relative">
         <div className="absolute inset-0 bg-[radial-gradient(#ffffff11_1px,transparent_1px)] bg-[size:50px_50px]" />
 
-        <div className="relative max-w-4xl mx-auto px-6 py-20">
+        <div className="relative max-w-4xl px-6 py-20">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
@@ -220,13 +221,13 @@ const CartPage = () => {
               </p>
             </div>
 
-            <Button
-              size="lg"
-              className="bg-amber-500 hover:bg-amber-600 text-black font-medium px-8 py-3 rounded-sm tracking-wide transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/25"
+            <Link
+              href="/boutique"
+              className="inline-flex items-center bg-amber-500 hover:bg-amber-600 text-black font-medium px-8 py-3 rounded-sm tracking-wide transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/25"
             >
               Découvrir nos Collections
               <ArrowRight className="ml-2 w-4 h-4" />
-            </Button>
+            </Link>
           </motion.div>
         </div>
       </div>

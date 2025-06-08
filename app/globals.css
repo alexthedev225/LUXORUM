@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -116,9 +118,6 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-.font-serif {
-  font-family: "Cinzel", serif;
-}
 
 .cinzel-decorative-black {
   font-family: "Cinzel Decorative", serif;

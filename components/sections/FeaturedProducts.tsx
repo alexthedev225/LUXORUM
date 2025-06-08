@@ -3,177 +3,241 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { products, Product, statsLabels } from "@/data/products";
+import { useRef, useState, useMemo } from "react";
+import { Crown, Star, ArrowUpRight, Diamond, Sparkles } from "lucide-react";
 
-// Sélection des 3 premiers produits pour la section Featured
-const featuredProducts = products.slice(0, 3);
+type Product = {
+  _id: string;
+  name: string;
+  description: string;
+  price: number;
+  stock: string; // Tu peux changer en number si tu préfères
+  images: string[];
+  category: {
+    _id: string;
+    name: string;
+  };
 
-const container = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.2 },
-  },
+  specifications: {
+    materials: string;
+    finish: string;
+    certificate: string;
+    collection: string;
+    additionalDetails?: string[];
+    stats: {
+      craftsmanship: string;
+      rarity: string;
+      prestige: string;
+      durability: string;
+    };
+    detailedDescription: string;
+  };
+  tag?: string;
+  discount?: string;
 };
 
-const item = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 },
+type ProductCardProps = {
+  product: Product;
+  index: number;
 };
 
-function ProductCard({ product }: { product: Product }) {
+type FeaturedProductsProps = {
+  products: Product[];
+};
+
+function ProductCard({ product, index }: ProductCardProps) {
+  const [isHovered, setIsHovered] = useState(false);
+
+  const craftsmanship = parseInt(
+    product.specifications.stats.craftsmanship,
+    10
+  );
+  const rarity = parseInt(product.specifications.stats.rarity, 10);
+  const prestige = parseInt(product.specifications.stats.prestige, 10);
+  const durability = parseInt(product.specifications.stats.durability, 10);
+
   return (
-    <motion.div variants={item}>
-      <Link href={`/boutique/${product.id}`} className="group block">
-        <article className="bg-black/90 backdrop-blur-xl rounded-2xl overflow-hidden border  border-amber-400/20">
-          {/* Image Container */}
-          <div className="relative aspect-square">
+    <motion.div
+      className="group h-full"
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, delay: index * 0.1 }}
+    >
+      <Link href={`/boutique/${product._id}`} className="block">
+        <article
+          className="flex flex-col h-full relative bg-gradient-to-br from-zinc-900/40 via-black/60 to-zinc-900/40 backdrop-blur-xl rounded-2xl overflow-hidden border border-amber-400/20 hover:border-amber-400/40 transition-all duration-500 hover:shadow-2xl hover:shadow-amber-400/10"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          <div className="relative aspect-[4/3] overflow-hidden">
             <Image
-              src={product.image}
+              src={product.images?.[0] ?? "/placeholder.jpg"}
               alt={product.name}
               fill
-              className="object-cover transition-transform duration-1000 ease-out group-hover:scale-110"
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
+              priority={index === 0}
             />
-            {/* Overlay complexe */}
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black opacity-90" />
-
-            {/* Badge */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
             {product.tag && (
               <div className="absolute top-4 left-4">
-                <div className="relative">
-                  <span className="absolute inset-0 bg-black/40 backdrop-blur-xl rounded-lg transform rotate-2" />
-                  <span className="relative block px-3 py-1 text-[10px] tracking-[0.2em] uppercase bg-black/60 backdrop-blur-xl rounded-lg border border-amber-400/30">
-                    <span className="bg-gradient-to-r from-amber-200 via-amber-100 to-amber-200 bg-clip-text text-transparent">
-                      {product.tag}
-                    </span>
+                <div className="bg-black/70 backdrop-blur-base rounded-xl border border-amber-400/30 px-3 py-2 flex items-center gap-2">
+                  <Crown className="w-3 h-3 text-amber-300" />
+                  <span className="text-sm tracking-wider uppercase font-medium text-amber-200">
+                    {product.tag}
                   </span>
                 </div>
               </div>
             )}
+            <div className="absolute top-4 right-4">
+              <div className="bg-black/70 backdrop-blur-base rounded-xl border border-zinc-700/50 px-3 py-2">
+                <p className="text-base font-semibold text-amber-300">
+                  {product.price.toLocaleString("fr-FR")} €
+                </p>
+              </div>
+            </div>
 
-            {/* Stats sur l'image */}
-            <div className="absolute bottom-0 left-0 right-0 p-6 space-y-4">
+            {/* Stats */}
+            <div className="absolute bottom-0 left-0 right-0 p-4">
               <div className="grid grid-cols-2 gap-3">
-                {Object.entries(product.stats).map(([key, value]) => (
-                  <div key={key} className="space-y-1">
-                    <div className="flex justify-between text-[10px] uppercase tracking-wider">
-                      <span className="text-zinc-200 font-medium">
-                        {statsLabels[key as keyof typeof statsLabels]}
+                {[
+                  ["craftsmanship", craftsmanship],
+                  ["rarity", rarity],
+                  ["prestige", prestige],
+                  ["durability", durability],
+                ].map(([key, value]) => (
+                  <div key={key} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-zinc-300 flex items-center gap-1 capitalize">
+                        <Star className="w-2 h-2 text-amber-400" />
+                        {key}
                       </span>
-                      <span className="text-amber-200/95 font-medium">
-                        {value}
+                      <span className="text-sm text-amber-300 font-semibold">
+                        {value}%
                       </span>
                     </div>
-                    <div className="h-1 bg-zinc-800/99 rounded-full overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${value}%` }}
-                        transition={{ duration: 1, delay: 0.2 }}
-                        className="h-full bg-gradient-to-r from-amber-300/80 to-amber-500/80"
+                    <div className="h-1 bg-zinc-900/60 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full transition-all duration-1000 ease-out"
+                        style={{ width: `${value}%` }}
                       />
                     </div>
                   </div>
                 ))}
               </div>
             </div>
+
+            {/* Hover icon */}
+            <div
+              className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ${
+                isHovered ? "opacity-100 scale-100" : "opacity-0 scale-75"
+              }`}
+            >
+              <div className="w-12 h-12 bg-amber-400 rounded-full flex items-center justify-center shadow-lg">
+                <Diamond className="w-5 h-5 text-black" />
+              </div>
+            </div>
           </div>
 
           {/* Content */}
-          <div className="p-6 space-y-6 border-t border-amber-400/20">
-            <div className="space-y-4">
-              <div className="flex justify-between items-start">
-                <div className="space-y-2">
-                  <p className="text-[10px] tracking-[0.2em] uppercase text-zinc-100 font-light">
-                    {product.category}
-                  </p>
-                  <h3 className="font-cinzel-decorative text-xl text-white group-hover:text-amber-200/95 transition-colors duration-300">
-                    {product.name}
-                  </h3>
-                </div>
-                <p className="text-lg font-light text-amber-300/95">
-                  {product.price.toLocaleString("fr-FR")} €
-                </p>
-              </div>
-
-              {/* Description ajoutée */}
-              <p className="text-sm text-zinc-200 font-light leading-relaxed">
-                {product.description}
-              </p>
+          <div className="p-6 space-y-4 flex-1">
+            <div className="text-center">
+              <span className="text-sm tracking-widest uppercase text-zinc-400">
+              {product.category.name}
+              </span>
             </div>
 
-            {/* Collection tag et caractéristiques */}
-            <div className="pt-4 flex flex-wrap gap-2">
-              <span className="px-2 py-1 text-[10px] bg-amber-400/20 rounded-full text-amber-200">
+            <h3 className="font-cinzel-decorative text-2xl text-center">
+              <span className="cinzel-decorative-black bg-gradient-to-r from-amber-300 via-amber-200 to-amber-300 bg-clip-text text-transparent group-hover:from-amber-200 group-hover:via-amber-100 group-hover:to-amber-200 transition-all duration-500">
+                {product.name}
+              </span>
+            </h3>
+            <p className="text-base text-zinc-300 text-center leading-relaxed line-clamp-1 max-w-md mx-auto">
+              {product.description}
+            </p>
+
+            <div className="flex flex-wrap justify-center gap-2">
+              <span className="px-3 py-1 text-sm bg-amber-400/20 border border-amber-400/30 rounded-full text-amber-200">
                 {product.specifications.collection}
               </span>
-              {product.specifications.additionalDetails?.map(
-                (detail, index) => (
-                  <span
-                    key={index}
-                    className="px-2 py-1 text-[10px] bg-zinc-800/60 rounded-full text-white"
-                  >
-                    {detail}
-                  </span>
-                )
-              )}
+              {product.specifications.additionalDetails?.map((detail, i) => (
+                <span
+                  key={i}
+                  className="px-3 py-1 text-sm bg-zinc-800/50 border border-zinc-700/50 rounded-full text-zinc-300"
+                >
+                  {detail}
+                </span>
+              ))}
             </div>
 
-            {/* CTA */}
-            <div className="pt-4 flex items-center justify-between">
-              <span className="text-sm text-zinc-200/90 group-hover:text-amber-200/95 transition-colors duration-300">
-                Découvrir →
-              </span>
-              <span className="text-xs text-zinc-200/90">
-                #{String(product.id).padStart(3, "0")}
-              </span>
+            <div className="pt-4 border-t border-zinc-800/50">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-base text-zinc-300 group-hover:text-amber-300 transition-colors duration-300">
+                  <Sparkles className="w-4 h-4" />
+                  <span>Explorer</span>
+                  <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-300" />
+                </div>
+                <span className="text-sm text-zinc-500 font-mono">
+                  #{product._id ? product._id.slice(-3).toUpperCase() : "N/A"}
+                </span>
+              </div>
             </div>
           </div>
-
-          {/* Effet de bordure au hover */}
-          <div className="absolute inset-0 border-2 border-amber-400/0 opacity-0 group-hover:opacity-100 group-hover:border-amber-400/20 transition-all duration-500 rounded-2xl" />
         </article>
       </Link>
     </motion.div>
   );
 }
 
-export function FeaturedProducts() {
+export function FeaturedProducts({ products }: FeaturedProductsProps) {
+  const sectionRef = useRef<HTMLElement>(null);
+  const featuredProducts = useMemo(() => products.slice(0, 3), [products]);
+
   return (
-    <section className="relative py-32 bg-black overflow-hidden rounded-2xl">
-      {/* Fond avec effet de profondeur */}
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-zinc-900/30 to-black" />
-        <div className="absolute inset-0 opacity-30 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-800 via-transparent to-transparent" />
+    <section ref={sectionRef} className="relative py-32 overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black via-zinc-950 to-black" />
+      <div className="absolute inset-0 opacity-30">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-amber-400/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-amber-400/5 rounded-full blur-3xl" />
       </div>
 
-      <motion.div
-        className="container relative mx-auto px-6"
-        variants={container}
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true }}
-      >
-        <header className="text-center mb-20 space-y-4">
-          <motion.span
-            className="block text-xs tracking-[0.3em] text-zinc-500 uppercase"
-            variants={item}
-          >
-            Pièces d'exception
-          </motion.span>
-          <motion.h2
-            className="cinzel-decorative-black text-3xl md:text-4xl lg:text-5xl font-serif text-white font-light "
-            variants={item}
-          >
-            Collection Signature
-          </motion.h2>
-        </header>
+      <div className="container relative mx-auto px-6 z-10">
+        <motion.header
+          className="text-center mb-20 space-y-6"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+        >
+          <div className="flex items-center justify-center gap-4 mb-4">
+            <div className="h-px w-16 bg-gradient-to-r from-transparent to-amber-400" />
+            <Diamond className="w-5 h-5 text-amber-400" />
+            <div className="h-px w-16 bg-gradient-to-l from-transparent to-amber-400" />
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {featuredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
+          <span className="block text-base tracking-[0.3em] text-zinc-400 uppercase">
+            Excellence · Artisanat · Luxe
+          </span>
+
+          <h2 className="font-cinzel-decorative text-5xl lg:text-6xl font-light">
+            <span className="cinzel-decorative-black bg-gradient-to-r from-amber-200 via-white to-amber-200 bg-clip-text text-transparent">
+              Collection Signature
+            </span>
+          </h2>
+
+          <p className="text-lg text-zinc-300 max-w-2xl mx-auto leading-relaxed">
+            Découvrez nos créations d&apos;exception, où chaque détail raconte
+            une histoire de perfection et d&apos;élégance intemporelle.
+          </p>
+        </motion.header>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
+          {featuredProducts.map((product, index) => (
+            <ProductCard key={product._id} product={product} index={index} />
           ))}
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }

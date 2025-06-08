@@ -78,12 +78,12 @@ export function Footer() {
                 contact@luxorum.com
               </p>
               <p className="text-sm text-zinc-400 font-light">
-                +33 1 23 45 67 89
+                +225 01 23 45 67 89
               </p>
               <p className="text-sm text-zinc-400 font-light">
                 8 Place Vendôme
                 <br />
-                75001 Paris, France
+                00225 Abidjan, Côte d'Ivoire
               </p>
             </div>
           </motion.div>

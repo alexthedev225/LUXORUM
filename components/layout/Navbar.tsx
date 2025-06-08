@@ -21,8 +21,6 @@ import {
 import { useIsAuthOrAdminPage } from "@/hooks/useIsAuthPage";
 import { useCartStore } from "@/stores/cart"; // adapte le chemin exact
 
-
-
 const routes = [
   { name: "Accueil", path: "/" },
   { name: "À propos", path: "/a-propos" },
@@ -57,10 +55,11 @@ const categories = [
 ];
 
 export function Navbar() {
-    const isAuthPage = useIsAuthOrAdminPage();
+  const isAuthPage = useIsAuthOrAdminPage();
 
   const [isScrolled, setIsScrolled] = useState(false);
-
+  const { getTotalItems } = useCartStore();
+  const totalItems = getTotalItems();
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
@@ -70,10 +69,7 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-    if (isAuthPage) return null;
-
-const { getTotalItems } = useCartStore();
-const totalItems = getTotalItems();
+  if (isAuthPage) return null;
 
   return (
     <header className="fixed w-full top-4 z-50">
@@ -188,29 +184,26 @@ const totalItems = getTotalItems();
             {/* Actions avec transitions */}
             <div className="flex items-center gap-1">
               {/* Bouton Panier avec badge */}
-              <Link href={"/cart"}>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="w-10 h-10 rounded-full hover:bg-zinc-800/50 transition-colors duration-300 bg-black relative"
-                >
-                  <ShoppingBag className="w-5 h-5 text-zinc-100 hover:text-amber-200 transition-colors duration-300" />
+              <Link
+                href="/cart"
+                className="w-10 h-10 rounded-full hover:bg-zinc-800/50 transition-colors duration-300 bg-black relative inline-flex items-center justify-center"
+              >
+                <ShoppingBag className="w-5 h-5 text-zinc-100 hover:text-amber-200 transition-colors duration-300" />
 
-                  {totalItems > 0 && (
-                    <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-[10px] font-bold leading-none text-black bg-amber-400 rounded-full transform translate-x-1/2 -translate-y-1/2">
-                      {totalItems}
-                    </span>
-                  )}
-                </Button>
+                {totalItems > 0 && (
+                  <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-[10px] font-bold leading-none text-black bg-amber-400 rounded-full transform translate-x-1/2 -translate-y-1/2">
+                    {totalItems}
+                  </span>
+                )}
               </Link>
+
               {/* Bouton Utilisateur */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="w-10 h-10 rounded-full hover:bg-zinc-800/50 transition-colors duration-300 bg-black"
+              <Link
+                href="/admin"
+                className="inline-flex items-center justify-center w-10 h-10 rounded-full hover:bg-zinc-800/50 transition-colors duration-300 bg-black"
               >
                 <User className="w-5 h-5 text-zinc-100 hover:text-amber-200 transition-colors duration-300" />
-              </Button>
+              </Link>
             </div>
 
             {/* Menu Mobile */}
