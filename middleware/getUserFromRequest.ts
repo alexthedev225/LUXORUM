@@ -10,6 +10,7 @@
     userId: string;
     email?: string;
     role?: string;
+    stripeCustomerId: string;
   }
 
   export async function getUserFromRequest(
@@ -42,6 +43,7 @@
         userId: payload.userId as string,
         email: payload.email as string | undefined,
         role: payload.role as string | undefined,
+        stripeCustomerId: payload.stripeCustomerId as string,
       };
 
       return { user: userPayload };

@@ -1,26 +1,31 @@
 import { NextResponse } from "next/server";
-import connect from "@/lib/mongoose";  // ta connexion Mongoose
+import connect from "@/lib/mongoose";
 import bcrypt from "bcryptjs";
 import { registerSchema } from "@/lib/validations/auth";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { verifyRecaptchaToken } from "@/lib/recaptcha";
 import { validateCsrfToken } from "@/lib/csrf";
+import Stripe from "stripe";
 
-import User from "@/models/User"; // <-- Import Mongoose model
+import User from "@/models/User";
 
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
   limiter: Ratelimit.slidingWindow(5, "10 m"),
 });
 
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2023-10-16",
+});
+
 export async function POST(req: Request) {
   try {
-    await connect(); 
+    await connect();
+
     const ip = req.headers.get("x-forwarded-for") ?? "127.0.0.1";
     const userAgent = req.headers.get("user-agent") ?? "unknown";
     const key = `${ip}-${userAgent}`;
-
     const { success, reset } = await ratelimit.limit(key);
     if (!success) {
       return NextResponse.json(
@@ -58,6 +63,7 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
     const isHuman = await verifyRecaptchaToken(body.recaptchaToken);
     if (!isHuman) {
       return NextResponse.json(
@@ -77,7 +83,6 @@ export async function POST(req: Request) {
 
     const { email, username, password, firstName, lastName } = result.data;
 
-    // Vérification des doublons avec Mongoose
     const existingUser = await User.findOne({
       $or: [
         { email: email.toLowerCase() },
@@ -94,12 +99,20 @@ export async function POST(req: Request) {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    // 1. Création du customer Stripe
+    const customer = await stripe.customers.create({
+      email,
+      name: `${firstName ?? ""} ${lastName ?? ""}`.trim(),
+    });
+
+    // 2. Création de l'utilisateur avec l'ID Stripe
     const newUser = new User({
       email: email.toLowerCase(),
       username: username.toLowerCase(),
       password: hashedPassword,
       firstName: firstName || null,
       lastName: lastName || null,
+      stripeCustomerId: customer.id,
     });
 
     await newUser.save();
@@ -112,6 +125,7 @@ export async function POST(req: Request) {
           email: newUser.email,
           username: newUser.username,
           role: newUser.role,
+          stripeCustomerId: newUser.stripeCustomerId,
         },
       },
       { status: 201 }

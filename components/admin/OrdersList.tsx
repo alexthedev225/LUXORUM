@@ -5,19 +5,20 @@ import { Badge } from "@/components/ui/badge"; // Vérifie bien l'import
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
+interface OrderItem {
+  productId: string | null; // _id du produit ou null si supprimé
+  name: string; // nom sauvegardé au moment de la commande
+  price: number; // prix sauvegardé au moment de la commande (en centimes)
+  images: string[]; // tableau d'images (vide si produit supprimé)
+  quantity: number;
+}
+
 interface Order {
   _id: string;
   amount: number;
   status: "paid" | "pending" | "cancelled" | string;
   createdAt: string;
-  items: {
-    product: {
-      name: string;
-      price: number;
-      images: string[];
-    };
-    quantity: number;
-  }[];
+  items: OrderItem[];
   userId: string;
 }
 
@@ -44,13 +45,18 @@ const statusVariants = {
   },
 };
 
+function getStatusVariant(status: string) {
+  if (status in statusVariants) {
+    return statusVariants[status as keyof typeof statusVariants];
+  }
+  return statusVariants.default;
+}
 export function OrdersList({ orders }: { orders: Order[] }) {
   return (
     <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
       <AnimatePresence>
         {orders.map((order, index) => {
-          const statusStyle =
-            statusVariants[order.status] || statusVariants.default;
+          const statusStyle = getStatusVariant(order.status);
 
           return (
             <motion.article
@@ -131,10 +137,10 @@ export function OrdersList({ orders }: { orders: Order[] }) {
                     transition={{ delay: 0.1 * i }}
                   >
                     {/* Miniature */}
-                    {item.product.images[0] && (
+                    {item.images.length > 0 && (
                       <img
-                        src={item.product.images[0]}
-                        alt={item.product.name}
+                        src={item.images[0]}
+                        alt={item.name}
                         className="w-12 h-12 rounded-lg object-cover shadow-md border border-amber-500"
                         loading="lazy"
                       />
@@ -143,7 +149,7 @@ export function OrdersList({ orders }: { orders: Order[] }) {
                     {/* Nom produit + quantité */}
                     <div className="flex-1 min-w-0">
                       <p className="truncate font-semibold text-amber-200">
-                        {item.product.name}
+                        {item.name || "Produit indisponible"}
                       </p>
                       <p className="text-xs text-zinc-400">
                         Quantité: {item.quantity}
@@ -152,7 +158,7 @@ export function OrdersList({ orders }: { orders: Order[] }) {
 
                     {/* Prix */}
                     <div className="text-amber-300 font-semibold min-w-[60px] text-right">
-                      {(item.product.price / 100).toFixed(2)} €
+                      {(item.price / 100).toFixed(2)} €
                     </div>
                   </motion.div>
                 ))}

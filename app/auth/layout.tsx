@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import RootLayout from "../layout";
 
-export const metadata: Metadata = {
-  title: "Connexion | Luxorum",
-  description: "Accédez à votre compte ou inscrivez-vous",
-};
+// export const metadata: Metadata = {
+//   title: "Connexion | Luxorum",
+//   description: "Accédez à votre compte ou inscrivez-vous",
+// };
 
 export default function AuthLayout({
   children,

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Sparkles, Star } from "lucide-react";
+import { ArrowRight, Sparkles, Star, Gem } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
@@ -181,10 +181,12 @@ export function HeroSection() {
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 1, delay: 0.8 }}
               >
-                <div className="text-3xl text-amber-200">⚜</div>
-                <div className="w-8 h-px bg-gradient-to-r from-transparent via-amber-400/60 to-transparent mx-auto" />
-                <div className="text-xs tracking-[0.2em] text-zinc-400/90 uppercase">
-                  Since 1999
+                <div className="flex flex-col items-center space-y-2">
+                  <Gem className="w-8 h-8 text-amber-200" />
+                  <div className="w-8 h-px bg-gradient-to-r from-transparent via-amber-400/60 to-transparent" />
+                  <div className="text-xs tracking-[0.2em] text-white uppercase">
+                    Since 1999
+                  </div>
                 </div>
               </motion.div>
             </div>

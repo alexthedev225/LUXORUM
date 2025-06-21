@@ -1,0 +1,516 @@
+ Profile Management
+GET /api/account/profile
+
+PUT /api/account/profileimport User from "@/models/User";
+import dbConnect from "@/lib/mongoose";
+import { withAuth } from "@/utils/withAuth";
+import { NextResponse } from "next/server";
+import { z } from "zod";
+
+const profileUpdateSchema = z.object({
+  firstName: z.string().min(1).optional(),
+  lastName: z.string().min(1).optional(),
+  phone: z.string().min(5).max(20).optional(),
+  // email non modifiable ici (à adapter si besoin)
+});
+
+export async function GET(req: Request) {
+  return withAuth(req, async (_req, user) => {
+    await dbConnect();
+
+    try {
+      const foundUser = await User.findById(user.userId)
+        .select("firstName lastName email phone")
+        .lean();
+
+      if (!foundUser) {
+        return NextResponse.json(
+          { message: "Utilisateur non trouvé" },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json(foundUser);
+    } catch (error) {
+      console.error("Erreur GET profile", error);
+      return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    }
+  });
+}
+
+export async function PUT(req: Request) {
+  return withAuth(req, async (req, user) => {
+    await dbConnect();
+
+    try {
+      const data = await req.json();
+
+      const parseResult = profileUpdateSchema.safeParse(data);
+      if (!parseResult.success) {
+        return NextResponse.json(
+          { message: "Données invalides", errors: parseResult.error.errors },
+          { status: 400 }
+        );
+      }
+
+      const updatedUser = await User.findByIdAndUpdate(
+        user.userId,
+        parseResult.data,
+        {
+          new: true,
+          runValidators: true,
+          context: "query",
+        }
+      ).select("firstName lastName email phone");
+
+      if (!updatedUser) {
+        return NextResponse.json(
+          { message: "Utilisateur non trouvé" },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json(updatedUser);
+    } catch (error) {
+      console.error("Erreur PUT profile", error);
+      return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    }
+  });
+}
+Address Management
+GET /api/account/addresses
+
+POST /api/account/addresses
+
+PUT /api/account/addresses/[id]
+
+DELETE /api/account/addresses/[id]
+
+import Address from "@/models/Address";
+import dbConnect from "@/lib/mongoose";
+import { withAuth } from "@/utils/withAuth";
+import { NextResponse } from "next/server";
+import { z } from "zod";
+
+const addressSchema = z.object({
+  street: z.string().min(1),
+  city: z.string().min(1),
+  state: z.string().min(1),
+  postalCode: z.string().min(1),
+  country: z.string().min(1),
+  isDefault: z.boolean().optional(),
+});
+
+export async function GET(req: Request) {
+  return withAuth(req, async (_req, user) => {
+    await dbConnect();
+
+    try {
+      const addresses = await Address.find({ user: user.userId }).lean();
+      return NextResponse.json(addresses);
+    } catch (error) {
+      console.error("Erreur GET addresses", error);
+      return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    }
+  });
+}
+
+export async function POST(req: Request) {
+  return withAuth(req, async (req, user) => {
+    await dbConnect();
+
+    try {
+      const data = await req.json();
+
+      const parseResult = addressSchema.safeParse(data);
+      if (!parseResult.success) {
+        return NextResponse.json(
+          { message: "Données invalides", errors: parseResult.error.errors },
+          { status: 400 }
+        );
+      }
+
+      // Si isDefault true, retirer l'option par défaut des autres adresses
+      if (parseResult.data.isDefault) {
+        await Address.updateMany(
+          { user: user.userId, isDefault: true },
+          { isDefault: false }
+        );
+      }
+
+      const newAddress = new Address({
+        ...parseResult.data,
+        user: user.userId,
+      });
+
+      await newAddress.save();
+
+      return NextResponse.json(newAddress, { status: 201 });
+    } catch (error) {
+      console.error("Erreur POST address", error);
+      return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    }
+  });
+}
+import Address from "@/models/Address";
+import dbConnect from "@/lib/mongoose";
+import { withAuth } from "@/utils/withAuth";
+import { NextResponse } from "next/server";
+import { z } from "zod";
+
+const addressUpdateSchema = z.object({
+  street: z.string().min(1).optional(),
+  city: z.string().min(1).optional(),
+  state: z.string().min(1).optional(),
+  postalCode: z.string().min(1).optional(),
+  country: z.string().min(1).optional(),
+  isDefault: z.boolean().optional(),
+});
+
+export async function PUT(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  return withAuth(req, async (req, user) => {
+    await dbConnect();
+
+    try {
+      const data = await req.json();
+
+      const parseResult = addressUpdateSchema.safeParse(data);
+      if (!parseResult.success) {
+        return NextResponse.json(
+          { message: "Données invalides", errors: parseResult.error.errors },
+          { status: 400 }
+        );
+      }
+
+      if (parseResult.data.isDefault) {
+        // Retirer l'adresse par défaut précédente
+        await Address.updateMany(
+          { user: user.userId, isDefault: true },
+          { isDefault: false }
+        );
+      }
+
+      const updatedAddress = await Address.findOneAndUpdate(
+        { userId: params.id, user: user.userId },
+        parseResult.data,
+        { new: true, runValidators: true }
+      );
+
+      if (!updatedAddress) {
+        return NextResponse.json(
+          { message: "Adresse non trouvée" },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json(updatedAddress);
+    } catch (error) {
+      console.error("Erreur PUT address", error);
+      return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    }
+  });
+}
+
+export async function DELETE(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  return withAuth(req, async (_req, user) => {
+    await dbConnect();
+
+    try {
+      const deletedAddress = await Address.findOneAndDelete({
+        userId: params.id,
+        user: user.userId,
+      });
+
+      if (!deletedAddress) {
+        return NextResponse.json(
+          { message: "Adresse non trouvée" },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json({ message: "Adresse supprimée" });
+    } catch (error) {
+      console.error("Erreur DELETE address", error);
+      return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    }
+  });
+}
+Orders History
+GET /api/account/orders
+import Order from "@/models/Order";
+import dbConnect from "@/lib/mongoose";
+import { withAuth } from "@/utils/withAuth";
+import { NextResponse } from "next/server";
+
+export async function GET(req: Request) {
+  return withAuth(req, async (_req, user) => {
+    await dbConnect();
+
+    try {
+      // Pagination & filtres via query params
+      const url = new URL(req.url);
+      const page = parseInt(url.searchParams.get("page") || "1");
+      const limit = parseInt(url.searchParams.get("limit") || "10");
+      const statusFilter = url.searchParams.get("status");
+      const dateFrom = url.searchParams.get("dateFrom");
+      const dateTo = url.searchParams.get("dateTo");
+
+      const filter: any = { userId: user.userId};
+
+      if (statusFilter) filter.status = statusFilter;
+      if (dateFrom || dateTo) filter.createdAt = {};
+      if (dateFrom) filter.createdAt.$gte = new Date(dateFrom);
+      if (dateTo) filter.createdAt.$lte = new Date(dateTo);
+
+      const orders = await Order.find(filter)
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .populate("items.product")
+        .lean();
+
+      const totalCount = await Order.countDocuments(filter);
+
+      return NextResponse.json({ orders, totalCount, page, limit });
+    } catch (error) {
+      console.error("Erreur GET orders", error);
+      return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    }
+  });
+}
+Payment Methods (Stripe)
+GET /api/account/payment-methods
+
+POST /api/account/payment-methods
+
+DELETE /api/account/payment-methods/[id]
+
+PUT /api/account/payment-methods/[id]
+import { withAuth } from "@/utils/withAuth";
+import { NextResponse } from "next/server";
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2023-10-16",
+});
+
+export async function GET(req: Request) {
+  return withAuth(req, async (_req, user) => {
+    try {
+      const paymentMethods = await stripe.paymentMethods.list({
+        customer: user.stripeCustomerId, // suppose que ce champ existe
+        type: "card",
+      });
+
+      return NextResponse.json(paymentMethods.data);
+    } catch (error) {
+      console.error("Erreur GET payment methods", error);
+      return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    }
+  });
+}
+
+export async function POST(req: Request) {
+  return withAuth(req, async (req, user) => {
+    try {
+      const { paymentMethodId } = await req.json();
+
+      if (!paymentMethodId) {
+        return NextResponse.json(
+          { message: "paymentMethodId est requis" },
+          { status: 400 }
+        );
+      }
+
+      // Attacher la carte au client Stripe
+      await stripe.paymentMethods.attach(paymentMethodId, {
+        customer: user.stripeCustomerId,
+      });
+
+      // Mettre à jour la méthode par défaut dans Stripe
+      await stripe.customers.update(user.stripeCustomerId, {
+        invoice_settings: { default_payment_method: paymentMethodId },
+      });
+
+      return NextResponse.json({ message: "Carte ajoutée" });
+    } catch (error) {
+      console.error("Erreur POST payment method", error);
+      return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    }
+  });
+}
+import { withAuth } from "@/utils/withAuth";
+import { NextResponse } from "next/server";
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2023-10-16",
+});
+
+export async function DELETE(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  return withAuth(req, async (_req, user) => {
+    try {
+      // Détacher la carte Stripe
+      await stripe.paymentMethods.detach(params.id);
+
+      return NextResponse.json({ message: "Carte supprimée" });
+    } catch (error) {
+      console.error("Erreur DELETE payment method", error);
+      return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    }
+  });
+}
+
+export async function PUT(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  return withAuth(req, async (_req, user) => {
+    try {
+      // Mettre à jour la carte par défaut dans Stripe
+      await stripe.customers.update(user.stripeCustomerId, {
+        invoice_settings: { default_payment_method: params.id },
+      });
+
+      return NextResponse.json({ message: "Carte définie par défaut" });
+    } catch (error) {
+      console.error("Erreur PUT payment method default", error);
+      return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    }
+  });
+}
+Preferences
+GET /api/account/preferences
+
+PUT /api/account/preferences
+import UserPreferences from "@/models/UserPreferences";
+import dbConnect from "@/lib/mongoose";
+import { withAuth } from "@/utils/withAuth";
+import { NextResponse } from "next/server";
+import { z } from "zod";
+
+const preferencesSchema = z.object({
+  newsletter: z.boolean().optional(),
+  language: z.string().min(2).max(10).optional(),
+  notifications: z.boolean().optional(),
+});
+
+export async function GET(req: Request) {
+  return withAuth(req, async (_req, user) => {
+    await dbConnect();
+
+    try {
+      const prefs = await UserPreferences.findOne({ userId: user.userId }).lean();
+
+      if (!prefs) {
+        return NextResponse.json({}, { status: 204 }); // Pas de contenu
+      }
+
+      return NextResponse.json(prefs);
+    } catch (error) {
+      console.error("Erreur GET preferences", error);
+      return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    }
+  });
+}
+
+export async function PUT(req: Request) {
+  return withAuth(req, async (req, user) => {
+    await dbConnect();
+
+    try {
+      const data = await req.json();
+      const parseResult = preferencesSchema.safeParse(data);
+
+      if (!parseResult.success) {
+        return NextResponse.json(
+          { message: "Données invalides", errors: parseResult.error.errors },
+          { status: 400 }
+        );
+      }
+
+      const updatedPrefs = await UserPreferences.findOneAndUpdate(
+        { userId: user.userId },
+        parseResult.data,
+        { new: true, upsert: true, runValidators: true }
+      );
+
+      return NextResponse.json(updatedPrefs);
+    } catch (error) {
+      console.error("Erreur PUT preferences", error);
+      return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    }
+  });
+}
+Security
+PUT /api/account/security
+
+DELETE /api/account/delete
+import User from "@/models/User";
+import dbConnect from "@/lib/mongoose";
+import { withAuth } from "@/utils/withAuth";
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import bcrypt from "bcryptjs";
+
+const passwordChangeSchema = z.object({
+  oldPassword: z.string().min(6),
+  newPassword: z.string().min(6),
+});
+
+export async function PUT(req: Request) {
+  return withAuth(req, async (req, user) => {
+    await dbConnect();
+
+    try {
+      const data = await req.json();
+
+      const parseResult = passwordChangeSchema.safeParse(data);
+      if (!parseResult.success) {
+        return NextResponse.json(
+          { message: "Données invalides", errors: parseResult.error.errors },
+          { status: 400 }
+        );
+      }
+
+      const currentUser = await User.findById(user.userId).select("password");
+
+      if (!currentUser) {
+        return NextResponse.json(
+          { message: "Utilisateur non trouvé" },
+          { status: 404 }
+        );
+      }
+
+      const isMatch = await bcrypt.compare(
+        parseResult.data.oldPassword,
+        currentUser.password
+      );
+
+      if (!isMatch) {
+        return NextResponse.json(
+          { message: "Ancien mot de passe incorrect" },
+          { status: 400 }
+        );
+      }
+
+      const hashed = await bcrypt.hash(parseResult.data.newPassword, 10);
+      currentUser.password = hashed;
+      await currentUser.save();
+
+      return NextResponse.json({ message: "Mot de passe modifié" });
+    } catch (error) {
+      console.error("Erreur PUT security", error);
+      return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    }
+  });
+}

@@ -16,19 +16,23 @@ export interface IUser extends Document {
   permissions: string[];
   firstName?: string;
   lastName?: string;
+  phone?: string;
   addresses: Types.ObjectId[];
   orders: Types.ObjectId[];
   cart?: Types.ObjectId;
   stockUpdates: Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
+  stripeCustomerId?: string; // ← à ajouter dans IUser
 }
 
 const UserSchema = new Schema<IUser>(
   {
+    stripeCustomerId: { type: String, required: false },
     email: { type: String, required: true, unique: true },
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    phone: { type: String, required: false },
     role: { type: String, enum: Object.values(Role), default: Role.USER },
     permissions: { type: [String], default: [] },
     firstName: String,

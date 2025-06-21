@@ -9,6 +9,7 @@ import Link from "next/link";
 import { ProductCard } from "./ProductCard";
 import HeaderSection from "./HeaderSection";
 
+
 type Product = {
   _id: string;
   name: string;
@@ -47,19 +48,20 @@ export default function ProductsClient({
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   // Pour naviguer en modifiant les query params
-  const updateUrl = (params: { page?: number; search?: string }) => {
-    const current = new URLSearchParams(searchParams.toString());
+ const updateUrl = (params: { page?: number; search?: string }) => {
+   const current = new URLSearchParams(window.location.search); // ← mise à jour dynamique
 
-    if (params.page !== undefined) current.set("page", params.page.toString());
-    if (params.search !== undefined) current.set("search", params.search);
+   if (params.page !== undefined) current.set("page", params.page.toString());
+   if (params.search !== undefined) current.set("search", params.search);
 
-    // reset page à 1 si recherche change
-    if (params.search !== searchTerm) {
-      current.set("page", "1");
-    }
+   // reset page à 1 si recherche change
+   if (params.search !== undefined && params.search !== searchTerm) {
+     current.set("page", "1");
+   }
 
-    router.push(`${window.location.pathname}?${current.toString()}`);
-  };
+   router.push(`${window.location.pathname}?${current.toString()}`);
+ };
+
 
   // Gestion soumission recherche (ex: au submit form)
   const handleSearchSubmit = (e: React.FormEvent) => {

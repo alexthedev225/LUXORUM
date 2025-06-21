@@ -28,22 +28,22 @@ function setSecurityHeaders(res: NextResponse) {
 }
 
 export async function middleware(req: NextRequest) {
- const { pathname, protocol } = req.nextUrl;
+  const { pathname, protocol } = req.nextUrl;
 
- // Forcer HTTPS uniquement en production
- if (
-   process.env.NODE_ENV === "production" &&
-   req.headers.get("x-forwarded-proto") === "http"
- ) {
-   const httpsUrl = new URL(req.url);
-   httpsUrl.protocol = "https:";
-   return setSecurityHeaders(NextResponse.redirect(httpsUrl, 301));
- }
+  // Forcer HTTPS uniquement en production
+  if (
+    process.env.NODE_ENV === "production" &&
+    req.headers.get("x-forwarded-proto") === "http"
+  ) {
+    const httpsUrl = new URL(req.url);
+    httpsUrl.protocol = "https:";
+    return setSecurityHeaders(NextResponse.redirect(httpsUrl, 301));
+  }
 
- console.log("Middleware exécuté pour le chemin:", pathname);
+  console.log("Middleware exécuté pour le chemin:", pathname);
 
   // Protéger uniquement les routes admin
-  if (pathname.startsWith("/admin")) {
+  if (pathname.startsWith("/admin") || pathname === "/mon-compte") {
     const token = req.cookies.get("token")?.value;
 
     console.log("Token trouvé:", token ? "Oui" : "Non");
@@ -90,7 +90,6 @@ export async function middleware(req: NextRequest) {
   // ✅ Pour toutes les autres routes
   return setSecurityHeaders(NextResponse.next());
 }
-
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin/:path*", "/mon-compte"],
 };

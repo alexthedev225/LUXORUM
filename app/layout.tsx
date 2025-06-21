@@ -1,54 +1,29 @@
-"use client";
+// app/layout.tsx
+import LayoutClient from "@/components/layout/LayoutClient";
 import "./globals.css";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
-import { CartProvider } from "@/context/CartContext";
-import { usePathname } from "next/navigation";
+import { getSettings } from "@/lib/api/getSettings"; // à créer côté serveur
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-  isAuthPage?: boolean; // 👈 ajout de la prop ici
-}>) {
-  const pathname = usePathname();
-
-  const isAuthPage =
-    pathname?.startsWith("/auth") || pathname?.startsWith("/admin");
+}) {
+  // Récupère les settings côté serveur (MongoDB, fichier, etc.)
+  const settings = await getSettings();
 
   return (
-    <html lang="fr">
+    <html lang={settings.language || "fr"}>
       <head>
-        <title>LUXORUM - Bijoux de Luxe pour Homme</title>
-        <meta
-          name="description"
-          content="Découvrez notre collection de bijoux de luxe pour homme. Élégance et sophistication à portée de main."
-        />
+        <title>{`${settings.siteName} - Bijoux de Luxe pour Homme`}</title>
+        <meta name="description" content={settings.siteDescription} />
         <link
           href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=Cinzel+Decorative:wght@400;700;900&display=swap"
           rel="stylesheet"
         />
       </head>
-      <body className="font-serif antialiased relative min-h-screen">
-        {/* Fond luxueux statique */}
-        <div className="fixed inset-0 z-[-1] overflow-hidden bg-black">
-          <div className="absolute inset-0">
-            <div className="absolute inset-0 bg-gradient-to-b from-amber-200/90 via-amber-100/90 to-amber-200/90" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-amber-200/10 via-transparent to-transparent" />
-          </div>
-          <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff11_1px,transparent_1px)] [background-size:32px_32px]" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
-        </div>
-
-        <Navbar />
-        <main
-          className={`min-h-screen relative ${
-            isAuthPage ? "px-0 pt-0" : "px-2 pt-10"
-          }`}
-        >
-          <CartProvider>{children}</CartProvider>
-        </main>
-        <Footer />
+      <body>
+        {/* Passer settings en props pour initialiser Zustand côté client */}
+        <LayoutClient initialSettings={settings}>{children}</LayoutClient>
       </body>
     </html>
   );

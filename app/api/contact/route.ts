@@ -1,25 +1,25 @@
-// app/api/contact/route.ts
-
-import { NextResponse } from "next/server";
-import { Resend } from "resend";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { sendEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
-  try {
-    const { name, email, message } = await req.json();
+  const formData = await req.formData();
+  const name = formData.get("name") as string;
+  const email = formData.get("email") as string;
+  const message = formData.get("message") as string;
 
-    const data = await resend.emails.send({
-      from: "Luxorum Contact <onboarding@resend.dev>",
-      to: "bekanticode@gmail.com", // Change-le par ton adresse
-      subject: `Nouveau message de ${name}`,
-      reply_to: email,
-      text: `Nom: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
-    });
+  const content = `
+    <h2 style="font-size: 1.25rem; color: #111827;">📬 Nouveau message de contact</h2>
+    <p><strong>Nom :</strong> ${name}</p>
+    <p><strong>Email :</strong> ${email}</p>
+    <p><strong>Message :</strong><br>${message}</p>
+  `;
 
-    return NextResponse.json({ success: true, data });
-  } catch (error) {
-    console.error("Erreur Resend:", error);
-    return NextResponse.json({ success: false, error }, { status: 500 });
-  }
+  const sent = await sendEmail({
+    to: "bekanticode@gmail.com",
+    subject: `Contact depuis le site - ${name}`,
+    content,
+  });
+
+  return new Response(JSON.stringify({ success: sent }), {
+    status: sent ? 200 : 500,
+  });
 }

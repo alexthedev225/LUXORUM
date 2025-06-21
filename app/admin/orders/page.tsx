@@ -24,6 +24,7 @@ export default async function AdminOrdersPage() {
   });
 
   const orders: Order[] = await res.json();
+  console.log("Orders fetched:", orders);
 
   return (
     <div className="p-6 bg-gradient-to-b from-black via-zinc-950 to-black min-h-screen">
