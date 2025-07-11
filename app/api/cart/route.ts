@@ -8,11 +8,6 @@ interface CartItem {
   quantity: number;
 }
 
-interface CartDocument {
-  userId: string;
-  items: CartItem[];
-}
-
 export async function GET(req: Request) {
   await connect();
 
@@ -124,7 +119,7 @@ export async function PUT(req: Request) {
         }
       }
 
-      let cart = await Cart.findOne({ userId: user.userId });
+      const cart = await Cart.findOne({ userId: user.userId });
       if (!cart) {
         return NextResponse.json(
           { message: "Panier non trouvé" },

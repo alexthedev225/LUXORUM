@@ -59,7 +59,6 @@ export default function ProductEditForm({ initialProduct, productId }: Props) {
   const router = useRouter();
   const [product, setProduct] = useState<Product>(initialProduct);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -96,7 +95,6 @@ const [formData, setFormData] = useState<ProductFormData>({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    setError(null);
 
     try {
       let res;
@@ -141,7 +139,6 @@ const [formData, setFormData] = useState<ProductFormData>({
     } catch (err: unknown) {
       const error =
         err instanceof Error ? err.message : "Une erreur est survenue";
-      setError(error);
       alert("Erreur lors de la mise à jour");
     } finally {
       setLoading(false);

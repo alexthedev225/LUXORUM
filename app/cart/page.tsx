@@ -5,8 +5,8 @@ import Image from "next/image";
 import { useCartStore } from "@/stores/cart";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import SavedCardsList from "@/components/payment/SavedCardsList"; // adapte le chemin si besoin
-import { toast, Toaster } from "react-hot-toast"; // <-- importer ici
+import SavedCardsList from "@/components/payment/SavedCardsList"; 
+import { toast, Toaster } from "react-hot-toast";
 import {
   ShoppingBag,
   Minus,
@@ -35,7 +35,7 @@ const stripePromise = loadStripe(
 const CartPage = () => {
   const { items, updateQuantity, removeFromCart, setItems } = useCartStore();
   const [savedItems, setSavedItems] = useState<string[]>([]);
-  const [appliedPromo, setAppliedPromo] = useState("");
+
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
     string | null
   >(null);
@@ -89,7 +89,7 @@ const CartPage = () => {
           errorData.message || res.statusText
         );
       } else {
-        const updatedCart = await res.json();
+        await res.json();
       }
     } catch (error) {
       console.error("Erreur réseau lors du PUT /api/cart:", error);
@@ -151,8 +151,12 @@ const CartPage = () => {
       } else {
         throw new Error("Réponse Stripe inattendue");
       }
-    } catch (error: any) {
-      toast.error("Erreur : " + error.message);
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error("Erreur : " + error.message);
+      } else {
+        toast.error("Une erreur inconnue s'est produite.");
+      }
     }
   };
 
@@ -173,16 +177,11 @@ const CartPage = () => {
           "Erreur API /api/cart/item DELETE:",
           errorData.message || res.statusText
         );
-        // Optionnel rollback local si suppression serveur échoue
-        // Ici, tu pourrais re-ajouter l’item en local si tu veux (pas obligatoire)
       } else {
-        const updatedCart = await res.json();
-        // Optionnel : synchroniser Zustand avec serveur
-        // setItems(updatedCart.items);
+        await res.json();
       }
     } catch (error) {
       console.error("Erreur réseau DELETE /api/cart/item:", error);
-      // Optionnel rollback local ici
     }
   };
 
@@ -201,8 +200,8 @@ const CartPage = () => {
   );
   const shipping = subtotal > 150 ? 0 : 15;
   const tax = subtotal * 0.2; // TVA 20%
-  const promoDiscount = appliedPromo ? subtotal * 0.1 : 0;
-  const total = subtotal + shipping + tax - promoDiscount;
+
+  const total = subtotal + shipping + tax;
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -569,13 +568,6 @@ const CartPage = () => {
                       <span>TVA (20%)</span>
                       <span>{tax.toFixed(2)}€</span>
                     </div>
-
-                    {promoDiscount > 0 && (
-                      <div className="flex justify-between text-green-400">
-                        <span>Réduction</span>
-                        <span>-{promoDiscount.toFixed(2)}€</span>
-                      </div>
-                    )}
 
                     <div className="border-t border-zinc-800/50 pt-4">
                       <div className="flex justify-between text-lg font-medium text-white/95">

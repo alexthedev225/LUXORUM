@@ -1,6 +1,6 @@
 "use client";
 
-import { Lock, UserX, Shield, AlertTriangle } from "lucide-react";
+import { Lock, UserX, AlertTriangle } from "lucide-react";
 import React, { ReactNode, useState, FormEvent } from "react";
 
 interface ModalProps {
@@ -10,7 +10,7 @@ interface ModalProps {
   children: ReactNode;
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
+const Modal: React.FC<ModalProps> = ({ isOpen, title, children }) => {
   if (!isOpen) return null;
 
   return (

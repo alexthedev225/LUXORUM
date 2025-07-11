@@ -68,8 +68,12 @@ const handleSubmit = async (formData: RegisterFormData) => {
     }
 
     router.push("/auth/login?registered=true");
-  } catch (error: any) {
-    setError(error.message);
+  } catch (error) {
+    if (error instanceof Error) {
+      setError(error.message);
+    } else {
+      setError("Une erreur inconnue s'est produite");
+    }
   } finally {
     setLoading(false);
   }
@@ -91,7 +95,7 @@ const handleSubmit = async (formData: RegisterFormData) => {
                 Créer votre compte
               </h2>
               <p className="text-sm text-white/90 tracking-wide">
-                Rejoignez l'univers de l'excellence
+                Rejoignez l&apos;univers de l&apos;excellence
               </p>
             </div>
           </div>

@@ -10,7 +10,7 @@ export async function DELETE(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  return withAuth(req, async (_req, user) => {
+  return withAuth(req, async () => {
     try {
       // Détacher la carte Stripe
       await stripe.paymentMethods.detach(params.id);

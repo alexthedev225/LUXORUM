@@ -159,7 +159,7 @@ export default function AdminLayout({
 
         {/* Navigation */}
         <nav className="flex flex-col p-3 pt-6 space-y-1">
-          {menuItems.map((item, index) => (
+          {menuItems.map((item) => (
             <motion.div
               key={item.path}
               className="relative"

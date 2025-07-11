@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import mongoose from "mongoose";
-import Order, { IOrder } from "@/models/Order";
+import Order from "@/models/Order";
 import Cart, { type ICart } from "@/models/Cart";
 import User from "@/models/User";
 import type { IProduct } from "@/models/Product";

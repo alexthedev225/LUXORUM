@@ -7,7 +7,7 @@ export async function getAnalyticsStats(timeRange: string = "7d") {
   await connectToDB();
 
   // Calcule la date de début selon timeRange
-  let startDate = new Date();
+  const startDate = new Date();
   switch (timeRange) {
     case "24h":
       startDate.setDate(startDate.getDate() - 1);

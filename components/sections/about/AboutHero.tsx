@@ -2,11 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import dynamic from "next/dynamic";
-import { Award, Sparkles } from "lucide-react";
 
-// Dynamic imports pour Image
-const Image = dynamic(() => import("next/image"));
 
 export function AboutHero() {
   return (

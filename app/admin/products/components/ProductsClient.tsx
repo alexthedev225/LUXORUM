@@ -4,7 +4,7 @@ import React, { useState} from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, Plus, Package, Search } from "lucide-react";
+import { ArrowLeft, ArrowRight, Plus, Package } from "lucide-react";
 import Link from "next/link";
 import { ProductCard } from "./ProductCard";
 import HeaderSection from "./HeaderSection";
@@ -41,7 +41,6 @@ export default function ProductsClient({
   searchTerm: initialSearchTerm,
 }: Props) {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   // States contrôlant la recherche et affichage côté client
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);

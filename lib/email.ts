@@ -20,7 +20,7 @@ export async function sendEmail({
   const html = generateEmailTemplate(content);
 
   try {
-    const { data, error } = await resend.emails.send({
+    const { error } = await resend.emails.send({
       from,
       to,
       subject,

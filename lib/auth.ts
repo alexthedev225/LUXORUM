@@ -20,7 +20,7 @@ export async function verifyAuth(token: string): Promise<JWTPayload> {
       throw new Error("Token expiré");
     }
     return payload;
-  } catch (error) {
+  } catch {
     throw new Error("Token invalide");
   }
 }

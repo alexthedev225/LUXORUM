@@ -7,8 +7,6 @@ import { useState } from "react";
 import {
   ShoppingCart,
   Star,
-  Heart,
-  Share2,
   Shield,
   Truck,
   RotateCcw,
@@ -27,8 +25,6 @@ type Props = {
 export function ProductDetails({ product }: Props) {
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [isWishlisted, setIsWishlisted] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [showStockAlert, setShowStockAlert] = useState(false);
 

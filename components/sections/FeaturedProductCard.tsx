@@ -39,9 +39,6 @@ type ProductCardProps = {
   index: number;
 };
 
-type FeaturedProductsProps = {
-  products: Product[];
-};
 
 export function FeaturedProductCard({ product, index }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);

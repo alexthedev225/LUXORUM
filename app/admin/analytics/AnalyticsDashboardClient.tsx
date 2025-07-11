@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, ReactNode, useCallback } from "react";
+import { useState,ReactNode, useCallback } from "react";
 import { motion } from "framer-motion";
 import {
   DollarSign,

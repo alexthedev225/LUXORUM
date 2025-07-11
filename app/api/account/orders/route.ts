@@ -1,7 +1,8 @@
-import Order from "@/models/Order";
+import Order, { IOrder } from "@/models/Order";
 import dbConnect from "@/lib/mongoose";
 import { withAuth } from "@/utils/withAuth";
 import { NextResponse } from "next/server";
+import { FilterQuery } from "mongoose";
 import "@/models/Product";
 
 export async function GET(req: Request) {
@@ -9,7 +10,6 @@ export async function GET(req: Request) {
     await dbConnect();
 
     try {
-      // Pagination & filtres via query params
       const url = new URL(req.url);
       const page = parseInt(url.searchParams.get("page") || "1");
       const limit = parseInt(url.searchParams.get("limit") || "10");
@@ -17,12 +17,19 @@ export async function GET(req: Request) {
       const dateFrom = url.searchParams.get("dateFrom");
       const dateTo = url.searchParams.get("dateTo");
 
-      const filter: any = { userId: user.userId};
+      const filter: FilterQuery<IOrder> = {
+        userId: user.userId,
+      };
 
-      if (statusFilter) filter.status = statusFilter;
-      if (dateFrom || dateTo) filter.createdAt = {};
-      if (dateFrom) filter.createdAt.$gte = new Date(dateFrom);
-      if (dateTo) filter.createdAt.$lte = new Date(dateTo);
+      if (statusFilter) {
+        filter.status = statusFilter as IOrder["status"];
+      }
+
+      if (dateFrom || dateTo) {
+        filter.createdAt = {};
+        if (dateFrom) filter.createdAt.$gte = new Date(dateFrom);
+        if (dateTo) filter.createdAt.$lte = new Date(dateTo);
+      }
 
       const orders = await Order.find(filter)
         .sort({ createdAt: -1 })

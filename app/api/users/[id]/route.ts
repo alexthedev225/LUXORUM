@@ -55,7 +55,7 @@ export async function PUT(
       const data = await req.json();
 
       // Exclure la mise à jour du password ici (si besoin, faire une route dédiée)
-      const { password, ...updateData } = data;
+      const { ...updateData } = data;
 
       // Valider ici éventuellement le role et permissions (à adapter selon besoin)
       if (
