@@ -53,6 +53,9 @@ const FormField = memo(
   )
 );
 
+FormField.displayName = "FormField";
+
+
 export default function AddAddressPage() {
   const router = useRouter();
 

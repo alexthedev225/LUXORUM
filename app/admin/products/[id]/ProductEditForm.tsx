@@ -66,15 +66,15 @@ export default function ProductEditForm({ initialProduct, productId }: Props) {
     initialProduct.images[0] || null
   );
 
-const [formData, setFormData] = useState<ProductFormData>({
-  name: initialProduct.name,
-  description: initialProduct.description,
-  price: initialProduct.price,
-  stock: initialProduct.stock,
-  images: initialProduct.images,
-  category: initialProduct.category?._id || "",
-  discount: initialProduct.discount || 0,
-});
+  const [formData, setFormData] = useState<ProductFormData>({
+    name: initialProduct.name,
+    description: initialProduct.description,
+    price: initialProduct.price,
+    stock: initialProduct.stock,
+    images: initialProduct.images,
+    category: initialProduct.category?._id || "",
+    discount: initialProduct.discount || 0,
+  });
 
   async function handleDelete() {
     try {
@@ -84,7 +84,7 @@ const [formData, setFormData] = useState<ProductFormData>({
       });
       if (!res.ok) throw new Error("Erreur lors de la suppression");
       router.push("/admin/products");
-    } catch (e) {
+    } catch {
       alert("Erreur lors de la suppression");
     } finally {
       setLoading(false);
@@ -136,9 +136,7 @@ const [formData, setFormData] = useState<ProductFormData>({
       }));
 
       alert("Produit mis à jour avec succès !");
-    } catch (err: unknown) {
-      const error =
-        err instanceof Error ? err.message : "Une erreur est survenue";
+    } catch {
       alert("Erreur lors de la mise à jour");
     } finally {
       setLoading(false);

@@ -11,9 +11,6 @@
     "lint": "next lint",
     "setup-db": "node scripts/setup-database.mjs"
   },
-  "prisma": {
-    "seed": "ts-node prisma/seed.ts"
-  },
   "dependencies": {
     "@chakra-ui/react": "^3.21.1",
     "@emotion/react": "^11.14.0",

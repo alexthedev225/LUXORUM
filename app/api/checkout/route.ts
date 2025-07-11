@@ -16,14 +16,19 @@ interface CartItem {
 
 function isStripeError(
   error: unknown
-): error is { code?: string; message: string; raw?: any } {
+): error is {
+  code?: string;
+  message: string;
+  raw?: { payment_intent?: { id?: string } };
+} {
   return (
     typeof error === "object" &&
     error !== null &&
     "message" in error &&
-    typeof (error as any).message === "string"
+    typeof (error as { message?: unknown }).message === "string"
   );
 }
+
 
 export async function POST(req: Request) {
   await connect();
