@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge"; // Vérifie bien l'import
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 
 interface OrderItem {
   productId: string | null; // _id du produit ou null si supprimé
@@ -138,12 +139,16 @@ export function OrdersList({ orders }: { orders: Order[] }) {
                   >
                     {/* Miniature */}
                     {item.images.length > 0 && (
-                      <img
-                        src={item.images[0]}
-                        alt={item.name}
-                        className="w-12 h-12 rounded-lg object-cover shadow-md border border-amber-500"
-                        loading="lazy"
-                      />
+                      <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-amber-500 shadow-md">
+                        <Image
+                          src={item.images[0]}
+                          alt={item.name}
+                          fill
+                          className="object-cover rounded-lg"
+                          sizes="48px"
+                          priority={false}
+                        />
+                      </div>
                     )}
 
                     {/* Nom produit + quantité */}

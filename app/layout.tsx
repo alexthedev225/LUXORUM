@@ -4,6 +4,21 @@ import "./globals.css";
 import { getSettings } from "@/lib/api/getSettings"; // à créer côté serveur
 import * as jose from "jose";
 import { cookies } from "next/headers";
+import { Cinzel, Cinzel_Decorative } from "next/font/google";
+
+const cinzel = Cinzel({
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400", "700", "900"], // ajuste selon ton usage
+  variable: "--font-cinzel",
+});
+
+const cinzelDecorative = Cinzel_Decorative({
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400", "700", "900"],
+  variable: "--font-cinzel-decorative",
+});
 
 const SECRET = process.env.JWT_SECRET!;
 
@@ -40,7 +55,7 @@ export default async function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body>
+      <body className={`${cinzel.variable} ${cinzelDecorative.variable}`}>
         <LayoutClient
           initialSettings={settings}
           isAdmin={isAdmin}

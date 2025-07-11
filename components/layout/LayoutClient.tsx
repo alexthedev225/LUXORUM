@@ -6,9 +6,12 @@ import { useSettingsStore } from "@/stores/useSettingsStore";
 import { Navbar } from "./Navbar";
 import { Footer } from "./Footer";
 import { Toaster } from "react-hot-toast";
-
+interface Settings {
+  theme: "dark" | "light";
+  maintenanceMode: boolean;
+}
 interface LayoutClientProps {
-  initialSettings: any; 
+  initialSettings: Settings;
   isAdmin: boolean;
   children: React.ReactNode;
   isAuthenticated: boolean;

@@ -1,8 +1,9 @@
 import { Schema, model, models, Document, Types } from "mongoose";
+import { IProduct } from "./Product";
 
 // Définir un type pour un item de panier
 interface CartItem {
-  product: Types.ObjectId; // Référence au modèle Product
+  product: IProduct | Types.ObjectId;
   quantity: number;
 }
 

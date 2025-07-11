@@ -10,6 +10,13 @@ function getCsrfTokenFromCookie() {
   const match = document.cookie.match(new RegExp("(^| )csrf-token=([^;]+)"));
   return match ? match[2] : null;
 }
+interface RegisterFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  username: string;
+  password: string;
+}
 
 export default function RegisterClient() {
   const [error, setError] = useState("");
@@ -20,53 +27,53 @@ export default function RegisterClient() {
     fetch("/api/auth/csrf");
   }, []);
 
-  const handleSubmit = async (formData: any) => {
-    setLoading(true);
-    setError("");
+const handleSubmit = async (formData: RegisterFormData) => {
+  setLoading(true);
+  setError("");
 
-    try {
-      const csrfToken = getCsrfTokenFromCookie();
+  try {
+    const csrfToken = getCsrfTokenFromCookie();
 
-      if (!csrfToken) {
-        throw new Error("Jeton CSRF introuvable");
-      }
-
-      // Récupération du token reCAPTCHA v3
-      const recaptchaToken = await new Promise<string>((resolve) => {
-        window.grecaptcha.ready(() => {
-          window.grecaptcha
-            .execute(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!, {
-              action: "register",
-            })
-            .then(resolve);
-        });
-      });
-
-      // Ajouter le token au payload envoyé
-      const payload = { ...formData, recaptchaToken };
-
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-csrf-token": csrfToken,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const error = await res.json();
-        console.log("Erreur serveur:", error);
-        throw new Error(error.message || "Erreur lors de l'inscription");
-      }
-
-      router.push("/auth/login?registered=true");
-    } catch (error: any) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
+    if (!csrfToken) {
+      throw new Error("Jeton CSRF introuvable");
     }
-  };
+
+    // Récupération du token reCAPTCHA v3
+    const recaptchaToken = await new Promise<string>((resolve) => {
+      window.grecaptcha.ready(() => {
+        window.grecaptcha
+          .execute(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!, {
+            action: "register",
+          })
+          .then(resolve);
+      });
+    });
+
+    // Ajouter le token au payload envoyé
+    const payload = { ...formData, recaptchaToken };
+
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-csrf-token": csrfToken,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const error = await res.json();
+      console.log("Erreur serveur:", error);
+      throw new Error(error.message || "Erreur lors de l'inscription");
+    }
+
+    router.push("/auth/login?registered=true");
+  } catch (error: any) {
+    setError(error.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-8 bg-black relative overflow-hidden">

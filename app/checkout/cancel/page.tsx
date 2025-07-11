@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import { XCircle, Sparkles } from "lucide-react";
-import { useEffect } from "react";
 
 export default function CheckoutCancelPage() {
 
@@ -102,7 +101,7 @@ export default function CheckoutCancelPage() {
             className="block w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 relative overflow-hidden group"
           >
             <motion.div className="absolute inset-0 bg-gradient-to-r from-red-400 to-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <span className="relative z-10">Retour à l'accueil</span>
+            <span className="relative z-10">Retour à l&apos;accueil</span>
           </motion.a>
         </motion.div>
       </div>

@@ -16,7 +16,7 @@ export default function SpecificationsInput({ onChange }: Props) {
       if (key.trim()) obj[key] = value;
     });
     onChange(JSON.stringify(obj));
-  }, [specs]);
+  }, [specs, onChange]); // ✅ Ajout de onChange
 
   const handleSpecChange = (
     index: number,

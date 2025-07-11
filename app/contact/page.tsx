@@ -424,7 +424,7 @@ function ContactInfo() {
         <div className="flex items-center gap-3">
           <Clock className="w-5 h-5 text-amber-400/80" />
           <h3 className="text-lg text-amber-200/90 font-light">
-            Horaires d'ouverture
+            Horaires d&apos;ouverture
           </h3>
         </div>
 

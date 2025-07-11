@@ -42,35 +42,35 @@ export default function MultiStepProductForm() {
     fetchCategories();
   }, []);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const body = new FormData();
-    body.append("name", formData.name);
-    body.append("price", formData.price);
-    body.append("stock", formData.stock);
-    body.append("categoryId", formData.categoryId);
-    body.append("description", formData.description);
-    body.append("detailedDescription", formData.detailedDescription);
-    body.append("specifications", formData.specifications);
+ async function handleSubmit(e?: React.FormEvent<HTMLFormElement>) {
+   e?.preventDefault();
+   const body = new FormData();
+   body.append("name", formData.name);
+   body.append("price", formData.price);
+   body.append("stock", formData.stock);
+   body.append("categoryId", formData.categoryId);
+   body.append("description", formData.description);
+   body.append("detailedDescription", formData.detailedDescription);
+   body.append("specifications", formData.specifications);
 
-    if (formData.images) {
-      for (const file of Array.from(formData.images)) {
-        body.append("images", file);
-      }
-    }
+   if (formData.images) {
+     for (const file of Array.from(formData.images)) {
+       body.append("images", file);
+     }
+   }
 
-    const response = await fetch("/api/products", {
-      method: "POST",
-      body,
-    });
+   const response = await fetch("/api/products", {
+     method: "POST",
+     body,
+   });
 
-    const result = await response.json();
-    if (response.ok) {
-      alert("Produit ajouté avec succès !");
-    } else {
-      alert("Erreur : " + result.error);
-    }
-  }
+   const result = await response.json();
+   if (response.ok) {
+     alert("Produit ajouté avec succès !");
+   } else {
+     alert("Erreur : " + result.error);
+   }
+ }
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -173,7 +173,7 @@ export default function MultiStepProductForm() {
             type="button"
             onClick={() => {
               if (currentStep === steps.length) {
-                handleSubmit(new Event("submit") as any); // tu peux remplacer ça par une meilleure fonction plus bas
+                handleSubmit(); 
               } else {
                 nextStep();
               }

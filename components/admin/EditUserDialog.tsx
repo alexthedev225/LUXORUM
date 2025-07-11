@@ -58,9 +58,9 @@ export default function EditUserDialog({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-lg bg-zinc-900 border border-amber-400/30">
         <DialogHeader>
-          <DialogTitle>Modifier l'utilisateur</DialogTitle>
+          <DialogTitle>Modifier l&apos;utilisateur</DialogTitle>
           <DialogDescription>
-            Mettez à jour les informations de l'utilisateur.
+            Mettez à jour les informations de l&apos;utilisateur.
           </DialogDescription>
         </DialogHeader>
 

@@ -1,8 +1,16 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 
+interface RegisterFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  username: string;
+  password: string;
+}
+
 interface StepFormProps {
-  onSubmit: (data: any) => Promise<void>;
+  onSubmit: (data: RegisterFormData) => void;
   loading: boolean;
   error: string;
 }
@@ -142,7 +150,7 @@ export function StepForm({ onSubmit, loading, error }: StepFormProps) {
         >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className={labelClassName}>Nom d'utilisateur</label>
+              <label className={labelClassName}>Nom d&apos;utilisateur</label>
               <div className="relative group">
                 <input
                   type="text"

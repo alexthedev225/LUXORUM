@@ -22,7 +22,7 @@ const Link: React.FC<LinkProps> = ({ href, children, className, ...props }) => (
   </a>
 );
 
-// Typage d'une catégorie
+// Typage d&apos;une catégorie
 interface Category {
   name: string;
   description: string;
@@ -109,7 +109,7 @@ export function CategoriesSection() {
             transition={{ delay: 0.3 }}
           >
             <span className="cinzel-decorative-black block bg-gradient-to-r from-amber-200 via-amber-100 to-amber-200 text-transparent bg-clip-text">
-              L'excellence
+              L&apos;excellence
             </span>
             <span className="block text-white/95 font-light text-2xl md:text-3xl mt-2 tracking-wide">
               dans chaque détail
@@ -122,7 +122,7 @@ export function CategoriesSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
-            Quatre univers d'exception où se rencontrent tradition artisanale et
+            Quatre univers d&apos;exception où se rencontrent tradition artisanale et
             innovation contemporaine
           </motion.p>
         </header>

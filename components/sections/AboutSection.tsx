@@ -54,7 +54,7 @@ export function AboutSection() {
                 transition={{ delay: 0.4, duration: 0.8 }}
               >
                 <span className="cinzel-decorative-black block bg-gradient-to-r from-amber-200 via-amber-100 to-amber-200 text-transparent bg-clip-text">
-                  L'excellence
+                  L&apos;excellence
                 </span>
                 <span className="block text-white/95 font-light text-2xl md:text-3xl mt-2 tracking-wide">
                   au masculin
@@ -69,9 +69,9 @@ export function AboutSection() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
               >
-                LUXORUM incarne l'alliance parfaite entre tradition joaillière
-                et modernité. Notre maison se dédie à l'homme contemporain qui
-                assume son goût pour le raffinement et l'excellence.
+                LUXORUM incarne l&apos;alliance parfaite entre tradition joaillière
+                et modernité. Notre maison se dédie à l&apos;homme contemporain qui
+                assume son goût pour le raffinement et l&apos;excellence.
               </motion.p>
 
               <motion.p
@@ -80,7 +80,7 @@ export function AboutSection() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.8 }}
               >
-                Chaque pièce LUXORUM est le fruit d'un savoir-faire artisanal
+                Chaque pièce LUXORUM est le fruit d&apos;un savoir-faire artisanal
                 exceptionnel, sélectionnée pour sa capacité à sublimer la
                 personnalité de celui qui la porte. Notre vision : créer des
                 bijoux qui deviennent les témoins silencieux de votre réussite.

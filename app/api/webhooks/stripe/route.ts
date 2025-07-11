@@ -62,15 +62,17 @@ export async function POST(req: Request) {
             return NextResponse.json({ received: true });
           }
 
-          const orderItems = cart.items.map((item: { product: unknown; quantity: any; }) => {
-            const product = item.product as unknown as IProduct;
-            return {
-              product: product._id,
-              name: product.name,
-              price: product.price,
-              quantity: item.quantity,
-            };
-          });
+        const orderItems = cart.items.map((item: ICart["items"][number]) => {
+         const product = item.product as IProduct | null;
+         if (!product) throw new Error("Produit introuvable dans le panier");
+
+          return {
+            product: product._id,
+            name: product.name,
+            price: product.price,
+            quantity: item.quantity,
+          };
+        });
 
           const amount = paymentIntent.amount_received
             ? paymentIntent.amount_received / 100

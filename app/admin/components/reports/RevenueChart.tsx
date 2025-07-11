@@ -21,8 +21,26 @@ ChartJS.register(
   Legend
 );
 
+interface SalesData {
+  status: string;
+  _sum: {
+    total: number;
+  };
+}
+
+interface ChartData {
+  labels: string[];
+  datasets: {
+    label: string;
+    data: number[];
+    backgroundColor: string[];
+    borderColor: string[];
+    borderWidth: number;
+  }[];
+}
+
 export function RevenueChart() {
-  const [revenueData, setRevenueData] = useState<any>(null);
+  const [revenueData, setRevenueData] = useState<ChartData | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -31,12 +49,12 @@ export function RevenueChart() {
     fetch(`/api/admin/reports/sales?period=${period}`)
       .then((res) => res.json())
       .then((data) => {
-        const chartData = {
-          labels: data.salesData.map((d: any) => d.status),
+        const chartData: ChartData = {
+          labels: data.salesData.map((d: SalesData) => d.status),
           datasets: [
             {
               label: "Revenus par statut",
-              data: data.salesData.map((d: any) => d._sum.total),
+              data: data.salesData.map((d: SalesData) => d._sum.total),
               backgroundColor: [
                 "rgba(75, 192, 192, 0.5)",
                 "rgba(54, 162, 235, 0.5)",

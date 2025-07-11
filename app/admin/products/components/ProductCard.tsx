@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { Package } from "lucide-react";
 
 interface Product {
@@ -19,7 +19,7 @@ interface Product {
 interface ProductCardProps {
   product: Product;
   viewMode: "grid" | "list";
-  variants: any;
+  variants: Variants;
   imageUrl: (path: string) => string;
 }
 

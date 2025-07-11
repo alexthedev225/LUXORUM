@@ -21,14 +21,19 @@ interface Address {
   country: string;
   isDefault: boolean;
 }
-
+interface Product {
+  _id: string;
+  name: string;
+  images: string[];
+  price: number;
+}
 interface Order {
   _id: string;
   createdAt: string;
   amount: number;
   status: "pending" | "processing" | "shipped" | "delivered";
   items: Array<{
-    product: any;
+    product: Product;
     quantity: number;
     price: number;
     name: string;

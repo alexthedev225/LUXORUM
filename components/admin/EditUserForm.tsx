@@ -80,7 +80,7 @@ export default function EditUserForm({ user, onSave, onCancel, loading }: EditUs
           htmlFor="username"
         >
           <User className="inline h-4 w-4 mr-2 text-amber-400/60" />
-          Nom d'utilisateur
+          Nom d&apos;utilisateur
         </label>
         <Input
           id="username"
@@ -99,7 +99,7 @@ export default function EditUserForm({ user, onSave, onCancel, loading }: EditUs
           htmlFor="role"
         >
           <Shield className="inline h-4 w-4 mr-2 text-amber-400/60" />
-          Rôle d'utilisateur
+          Rôle d&apos;utilisateur
         </label>
         <Select
           value={role}

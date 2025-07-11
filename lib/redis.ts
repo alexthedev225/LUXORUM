@@ -1,3 +1,4 @@
+// redis.ts
 import { Redis } from "@upstash/redis";
 
 const redis = new Redis({
@@ -5,25 +6,40 @@ const redis = new Redis({
   token: process.env.UPSTASH_REDIS_REST_TOKEN!,
 });
 
-
+/**
+ * Récupère une donnée depuis Redis et la cast au type T
+ * @param key Clé Redis
+ * @returns Valeur de type T ou null si non trouvée
+ */
 export async function cacheGet<T>(key: string): Promise<T | null> {
   const data = await redis.get(key);
-  return data as T;
+  return data as T | null;
 }
 
-export async function cacheSet(
+/**
+ * Stocke une valeur dans Redis, avec expiration optionnelle
+ * @param key Clé Redis
+ * @param value Valeur à stocker
+ * @param expireInSeconds Durée en secondes avant expiration (optionnel)
+ */
+export async function cacheSet<T>(
   key: string,
-  value: any,
+  value: T,
   expireInSeconds?: number
-) {
+): Promise<void> {
   if (expireInSeconds) {
-    return redis.setex(key, expireInSeconds, value);
+    await redis.setex(key, expireInSeconds, value);
+  } else {
+    await redis.set(key, value);
   }
-  return redis.set(key, value);
 }
 
-export async function cacheDelete(key: string) {
-  return redis.del(key);
+/**
+ * Supprime une clé dans Redis
+ * @param key Clé Redis
+ */
+export async function cacheDelete(key: string): Promise<void> {
+  await redis.del(key);
 }
 
 export const redisClient = redis;

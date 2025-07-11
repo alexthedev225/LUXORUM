@@ -7,6 +7,14 @@ import { withAuth } from "@/utils/withAuth";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",
 });
+interface StripeError extends Error {
+  code?: string;
+  raw?: {
+    payment_intent: {
+      id: string;
+    };
+  };
+}
 
 export async function POST(req: Request) {
   return withAuth(req, async (_req, user) => {
@@ -44,21 +52,23 @@ export async function POST(req: Request) {
       });
 
       return NextResponse.json({ success: true, paymentIntent });
-    } catch (err: any) {
-      if (err.code === "authentication_required") {
+    } catch (err: unknown) {
+      const error = err as StripeError;
+
+      if (error.code === "authentication_required") {
         return NextResponse.json(
           {
             error: "Authentification requise",
-            paymentIntentId: err.raw.payment_intent.id,
+            paymentIntentId: error.raw?.payment_intent.id,
           },
           { status: 402 }
         );
       }
 
-      console.error("Erreur lors du paiement", err);
+      console.error("Erreur lors du paiement", error);
 
       return NextResponse.json(
-        { error: err.message || "Erreur lors du paiement" },
+        { error: error.message || "Erreur lors du paiement" },
         { status: 500 }
       );
     }

@@ -5,7 +5,7 @@ import { cacheGet, cacheSet, cacheDelete } from "@/lib/redis";
 import Product, { IProduct } from "@/models/Product";
 import "@/models/Category"; // Assure-toi que ce chemin est correct selon ta structure
 import dbConnect from "@/lib/mongoose";
-import { ProjectionType } from "mongoose";
+import { FilterQuery, ProjectionType } from "mongoose";
 
 export async function GET(req: Request) {
   await dbConnect();
@@ -16,21 +16,6 @@ export async function GET(req: Request) {
   const search = searchParams.get("search");
   const category = searchParams.get("category") || undefined;
   const skip = (page - 1) * limit;
-
-  // Tous les champs nécessaires au front
-  const ALLOWED_FIELDS = [
-    "_id",
-    "name",
-    "description",
-    "price",
-    "stock",
-    "images",
-    "category",
-    "specifications",
-    "discount",
-    "createdAt",
-    "updatedAt",
-  ];
 
   // Pour afficher tout ce dont le front a besoin, on force ici la projection complète
   // Sinon on peut garder la logique du paramètre fields si tu veux filtrer côté client
@@ -60,7 +45,7 @@ export async function GET(req: Request) {
     const cached = await cacheGet(cacheKey);
     if (cached) return NextResponse.json(cached);
 
-    const filter: Record<string, any> = {};
+   const filter: FilterQuery<IProduct> = {};
     if (category) filter.category = category;
     if (search) {
       filter.$or = [

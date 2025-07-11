@@ -1,20 +1,18 @@
 // app/admin/layout.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLogout } from "@/hooks/useLogout";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import Cookies from "js-cookie";
 import {
   Users,
   Package,
   BarChart3,
   ShoppingCart,
   Tag,
-  Settings,
   LogOut,
   Home,
   Menu,

@@ -78,7 +78,7 @@ export function ContactInfo() {
 
       {/* Section Horaires */}
       <div className="space-y-4">
-        <h3 className="text-lg text-amber-200/90">Horaires d'ouverture</h3>
+        <h3 className="text-lg text-amber-200/90">Horaires d&apos;ouverture</h3>
         <div className="space-y-2 text-sm">
           <p className="flex justify-between">
             <span className="text-zinc-400">Lundi - Vendredi</span>

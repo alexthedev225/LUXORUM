@@ -8,6 +8,10 @@
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
+:root {
+  --font-cinzel: "Cinzel", serif;
+  --font-cinzel-decorative: "Cinzel Decorative", serif;
+}
 
 @theme inline {
   --color-background: var(--background);

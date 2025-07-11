@@ -8,11 +8,7 @@ import {
   AlertTriangle,
   ArrowUp,
   ArrowDown,
-  ArrowRight,
   TrendingUp,
-  Package,
-  Eye,
-  Link,
   XCircle,
 } from "lucide-react";
 import VoirPlusCommandesButton from "./VoirPlusCommandesButton";
@@ -173,7 +169,7 @@ export default function DashboardContent({ stats }: DashboardContentProps) {
                 </span>
               </h1>
               <p className="text-lg text-zinc-300/90 font-light tracking-wide">
-                Vue d'ensemble de votre boutique{" "}
+                Vue d&apos;ensemble de votre boutique{" "}
                 <span className="text-amber-300/90 font-medium">Luxorum</span>
               </p>
             </motion.div>

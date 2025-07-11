@@ -93,7 +93,7 @@ export function Footer() {
               <p className="text-sm text-zinc-400 font-light">
                 8 Place Vendôme
                 <br />
-                00225 Abidjan, Côte d'Ivoire
+                00225 Abidjan, Côte d&apos;Ivoire
               </p>
             </div>
           </motion.div>

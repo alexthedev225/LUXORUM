@@ -165,7 +165,7 @@ export default function NewCategoryPage() {
                     required
                   />
                   <p className="text-xs text-zinc-400/90 flex items-center gap-1">
-                    <span>Utilisé dans l'URL de la catégorie</span>
+                    <span>Utilisé dans l&apos;URL de la catégorie</span>
                   </p>
                 </motion.div>
 
@@ -181,7 +181,7 @@ export default function NewCategoryPage() {
                     className="flex items-center gap-2 text-zinc-300/90 font-medium tracking-wide"
                   >
                     <BarChart3 className="w-4 h-4 text-amber-400/70" />
-                    Position d'affichage
+                    Position d&apos;affichage
                   </Label>
                   <Input
                     id="position"
@@ -194,7 +194,7 @@ export default function NewCategoryPage() {
                     required
                   />
                   <p className="text-xs text-zinc-400/90">
-                    Ordre d'affichage dans le menu (1 = premier)
+                    Ordre d&apos;affichage dans le menu (1 = premier)
                   </p>
                 </motion.div>
               </div>
@@ -258,7 +258,7 @@ export default function NewCategoryPage() {
               </div>
             </div>
 
-            {/* Message d'erreur */}
+            {/* Message d&apos;erreur */}
             {error && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
@@ -328,7 +328,7 @@ export default function NewCategoryPage() {
               </p>
               <p>
                 <strong className="text-amber-300/90">Description :</strong>{" "}
-                Décrivez l'univers et l'expérience proposée
+                Décrivez l&apos;univers et l&apos;expérience proposée
               </p>
             </div>
           </div>

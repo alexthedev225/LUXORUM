@@ -4,8 +4,18 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Edit, Trash2, MapPin, Home, Briefcase, X } from "lucide-react";
 
+interface Address {
+  _id: string;
+  label?: string;
+  street: string;
+  postalCode: string;
+  city: string;
+  state: string;
+  country: string;
+}
+
 interface AddressesSectionProps {
-  addresses: any[];
+  addresses: Address[];
 }
 
 interface FormData {
@@ -21,7 +31,9 @@ const citiesCI = ["Abidjan", "Bouaké", "Daloa", "Korhogo", "San-Pédro"];
 const postalCodesCI = ["00225", "00226", "00227", "00228"];
 
 const getIconForLabel = (label?: string) => {
-  switch (label?.toLowerCase()) {
+  if (!label) return MapPin;
+
+  switch (label.toLowerCase()) {
     case "domicile":
       return Home;
     case "bureau":
@@ -31,8 +43,10 @@ const getIconForLabel = (label?: string) => {
   }
 };
 
+
 const AddressesSection = ({ addresses }: AddressesSectionProps) => {
-  const [addressList, setAddressList] = useState(addresses);
+
+  const [addressList, setAddressList] = useState<Address[]>(addresses);
   const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({
     label: "",
@@ -43,7 +57,7 @@ const AddressesSection = ({ addresses }: AddressesSectionProps) => {
     country: "Côte d'Ivoire",
   });
 
-  const openEditModal = (address: any) => {
+  const openEditModal = (address: Address) => {
     setFormData({
       label: address.label || "",
       street: address.street,
@@ -240,7 +254,7 @@ const AddressesSection = ({ addresses }: AddressesSectionProps) => {
                   id="edit-address-title"
                   className="text-2xl font-light text-white tracking-wide"
                 >
-                  Modifier l'adresse
+                  Modifier l&apos;adresse
                 </h2>
                 <button
                   onClick={closeModal}
@@ -264,7 +278,7 @@ const AddressesSection = ({ addresses }: AddressesSectionProps) => {
                     htmlFor="label"
                     className="block text-sm font-light text-zinc-400 mb-2 tracking-wide"
                   >
-                    Nom de l'adresse
+                    Nom de l&apos;adresse
                   </label>
                   <input
                     id="label"

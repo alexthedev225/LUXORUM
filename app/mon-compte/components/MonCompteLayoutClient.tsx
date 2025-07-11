@@ -33,12 +33,26 @@ interface Address {
   country: string;
   isDefault: boolean;
 }
+interface Product {
+  _id: string;
+  name: string;
+  price: number;
+  image?: string;
+  description?: string;
+}
+interface OrderItem {
+  product: Product;
+  quantity: number;
+  price: number; 
+  name: string; 
+}
+
 interface Order {
   _id: string;
   createdAt: string;
   amount: number;
   status: "pending" | "processing" | "shipped" | "delivered";
-  items: Array<{ product: any; quantity: number; price: number; name: string }>;
+  items: OrderItem[];
 }
 
 

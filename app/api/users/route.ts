@@ -1,7 +1,8 @@
-import User from "@/models/User";
+import User, { IUser } from "@/models/User";
 import dbConnect from "@/lib/mongoose";
 import { withAuth } from "@/utils/withAuth";
 import { NextResponse } from "next/server";
+import { FilterQuery } from "mongoose";
 
 export async function GET(req: Request) {
   return withAuth(req, async (_req, user) => {
@@ -20,7 +21,7 @@ export async function GET(req: Request) {
     const limit = parseInt(url.searchParams.get("limit") ?? "10");
     const roleFilter = url.searchParams.get("role") ?? "";
 
-    const query: any = {};
+    const query: FilterQuery<IUser> = {};
     if (roleFilter) query.role = roleFilter;
 
     try {

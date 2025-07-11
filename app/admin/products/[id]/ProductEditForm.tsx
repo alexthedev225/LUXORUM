@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Save,
@@ -15,12 +14,24 @@ import {
   Percent,
   ImageIcon,
   ChevronLeft,
-  Star,
   TrendingUp,
   Eye,
 } from "lucide-react";
 import Link from "next/link";
 
+interface Specification {
+  name: string;
+  value: string | number;
+}
+interface ProductFormData {
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  images: string[];
+  category: string;
+  discount: number;
+}
 interface Product {
   _id: string;
   name: string;
@@ -30,7 +41,7 @@ interface Product {
   images: string[];
   category: { _id: string; name: string };
   discount?: number;
-  specifications?: any;
+  specifications?: Specification[];
 }
 
 interface Props {
@@ -56,16 +67,15 @@ export default function ProductEditForm({ initialProduct, productId }: Props) {
     initialProduct.images[0] || null
   );
 
-  const [formData, setFormData] = useState({
-    name: initialProduct.name,
-    description: initialProduct.description,
-    price: initialProduct.price,
-    stock: initialProduct.stock,
-    images: initialProduct.images, // tableau de strings (URLs)
-    category: initialProduct.category?._id || "",
-    discount: initialProduct.discount || 0,
-  });
-
+const [formData, setFormData] = useState<ProductFormData>({
+  name: initialProduct.name,
+  description: initialProduct.description,
+  price: initialProduct.price,
+  stock: initialProduct.stock,
+  images: initialProduct.images,
+  category: initialProduct.category?._id || "",
+  discount: initialProduct.discount || 0,
+});
 
   async function handleDelete() {
     try {
@@ -83,59 +93,60 @@ export default function ProductEditForm({ initialProduct, productId }: Props) {
     }
   }
 
- async function handleSubmit(e: React.FormEvent) {
-   e.preventDefault();
-   setLoading(true);
-   setError(null);
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
 
-   try {
-     let res;
+    try {
+      let res;
 
-     if (selectedFile) {
-       // FormData avec fichier
-       const data = new FormData();
-       data.append("name", formData.name);
-       data.append("description", formData.description);
-       data.append("price", formData.price.toString());
-       data.append("stock", formData.stock.toString());
-       data.append("categoryId", formData.category);
-       data.append("discount", formData.discount.toString());
-       data.append("images", selectedFile); // clé 'images' attendue côté backend
+      if (selectedFile) {
+        // FormData avec fichier
+        const data = new FormData();
+        data.append("name", formData.name);
+        data.append("description", formData.description);
+        data.append("price", formData.price.toString());
+        data.append("stock", formData.stock.toString());
+        data.append("categoryId", formData.category);
+        data.append("discount", formData.discount.toString());
+        data.append("images", selectedFile); // clé 'images' attendue côté backend
 
-       res = await fetch(`/api/products/${productId}`, {
-         method: "PUT",
-         body: data, // sans headers 'Content-Type'
-       });
-     } else {
-       // Envoi JSON classique avec URLs
-       res = await fetch(`/api/products/${productId}`, {
-         method: "PUT",
-         headers: { "Content-Type": "application/json" },
-         body: JSON.stringify(formData),
-       });
-     }
+        res = await fetch(`/api/products/${productId}`, {
+          method: "PUT",
+          body: data, // sans headers 'Content-Type'
+        });
+      } else {
+        // Envoi JSON classique avec URLs
+        res = await fetch(`/api/products/${productId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        });
+      }
 
-     if (!res.ok) throw new Error("Erreur lors de la mise à jour");
-     const updated = await res.json();
+      if (!res.ok) throw new Error("Erreur lors de la mise à jour");
+      const updated = await res.json();
 
-     // Met à jour le state local et réinitialise selectedFile
-     setProduct(updated);
-     setSelectedFile(null);
-     setPreviewUrl(updated.images[0] || null);
-     setFormData((prev) => ({
-       ...prev,
-       images: updated.images,
-     }));
+      // Met à jour le state local et réinitialise selectedFile
+      setProduct(updated);
+      setSelectedFile(null);
+      setPreviewUrl(updated.images[0] || null);
+      setFormData((prev) => ({
+        ...prev,
+        images: updated.images,
+      }));
 
-     alert("Produit mis à jour avec succès !");
-   } catch (e: any) {
-     setError(e.message);
-     alert("Erreur lors de la mise à jour");
-   } finally {
-     setLoading(false);
-   }
- }
-
+      alert("Produit mis à jour avec succès !");
+    } catch (err: unknown) {
+      const error =
+        err instanceof Error ? err.message : "Une erreur est survenue";
+      setError(error);
+      alert("Erreur lors de la mise à jour");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -465,14 +476,17 @@ export default function ProductEditForm({ initialProduct, productId }: Props) {
                         />
 
                         {previewUrl && (
-                          <img
-                            src={previewUrl}
-                            alt="Aperçu image"
-                            className="w-24 h-24 object-cover rounded-lg border border-zinc-700 mt-3"
-                            onLoad={(e) =>
-                              URL.revokeObjectURL(e.currentTarget.src)
-                            }
-                          />
+                          <div className="w-24 h-24 relative mt-3 rounded-lg overflow-hidden border border-zinc-700">
+                            <Image
+                              src={previewUrl}
+                              alt="Aperçu image"
+                              fill
+                              className="object-cover rounded-lg"
+                              onLoadingComplete={() =>
+                                URL.revokeObjectURL(previewUrl)
+                              }
+                            />
+                          </div>
                         )}
                       </div>
 

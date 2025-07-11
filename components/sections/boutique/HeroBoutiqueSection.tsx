@@ -30,7 +30,7 @@ export function HeroBoutiqueSection() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.8 }}
           >
-            Découvrez notre collection d'excellence
+            Découvrez notre collection d&apos;excellence
           </motion.h1>
 
           <motion.p
@@ -39,7 +39,7 @@ export function HeroBoutiqueSection() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.8 }}
           >
-            Des créations joaillières pensées pour l'homme contemporain, entre
+            Des créations joaillières pensées pour l&apos;homme contemporain, entre
             force et élégance.
           </motion.p>
         </motion.div>

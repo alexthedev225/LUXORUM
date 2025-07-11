@@ -2,11 +2,19 @@ import { NextResponse } from "next/server";
 import { withAuth } from "@/utils/withAuth";
 import Cart from "@/models/Cart";
 import Product from "@/models/Product";
-import connect from "@/lib/mongoose";  // ta fonction connect
+import connect from "@/lib/mongoose"; // ta fonction connect
+interface CartItem {
+  product: string; // id produit
+  quantity: number;
+}
 
+interface CartDocument {
+  userId: string;
+  items: CartItem[];
+}
 
 export async function GET(req: Request) {
-    await connect();
+  await connect();
 
   return withAuth(req, async (_req, user) => {
     try {
@@ -28,7 +36,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-    await connect();
+  await connect();
 
   return withAuth(req, async (req, user) => {
     try {
@@ -61,15 +69,12 @@ export async function POST(req: Request) {
           items: [{ product: productId, quantity }],
         });
       } else {
-        // Vérifier si produit déjà dans panier
         const index = cart.items.findIndex(
-          (item: { product: { toString: () => any; }; }) => item.product.toString() === productId
+          (item: CartItem) => item.product.toString() === productId
         );
         if (index > -1) {
-          // Incrémenter quantité
           cart.items[index].quantity += quantity;
         } else {
-          // Ajouter nouveau produit
           cart.items.push({ product: productId, quantity });
         }
       }
@@ -84,7 +89,7 @@ export async function POST(req: Request) {
 }
 
 export async function PUT(req: Request) {
-    await connect();
+  await connect();
 
   return withAuth(req, async (req, user) => {
     try {
@@ -98,24 +103,22 @@ export async function PUT(req: Request) {
         );
       }
 
-      // Valider chaque item
       for (const item of items) {
+        const typedItem = item as { productId: string; quantity: number };
         if (
-          !item.productId ||
-          typeof item.quantity !== "number" ||
-          item.quantity < 0
+          !typedItem.productId ||
+          typeof typedItem.quantity !== "number" ||
+          typedItem.quantity < 0
         ) {
           return NextResponse.json(
             { message: "Données invalides dans les items" },
             { status: 400 }
           );
         }
-
-        // Vérifier produit existe (optionnel mais recommandé)
-        const prod = await Product.findById(item.productId);
+        const prod = await Product.findById(typedItem.productId);
         if (!prod) {
           return NextResponse.json(
-            { message: `Produit ${item.productId} non trouvé` },
+            { message: `Produit ${typedItem.productId} non trouvé` },
             { status: 404 }
           );
         }
@@ -130,10 +133,10 @@ export async function PUT(req: Request) {
       }
 
       // Remplacer les items par ceux reçus
-      cart.items = items.map((item) => ({
-        product: item.productId,
-        quantity: item.quantity,
-      }));
+    cart.items = items.map((item: { productId: string; quantity: number }) => ({
+      product: item.productId,
+      quantity: item.quantity,
+    }));
 
       await cart.save();
       return NextResponse.json(cart);
@@ -145,7 +148,7 @@ export async function PUT(req: Request) {
 }
 
 export async function DELETE(req: Request) {
-    await connect();
+  await connect();
 
   return withAuth(req, async (_req, user) => {
     try {

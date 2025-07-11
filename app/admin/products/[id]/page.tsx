@@ -1,6 +1,11 @@
 // app/admin/products/[id]/page.tsx
 import ProductEditForm from "./ProductEditForm";
 
+interface Specification {
+  name: string;
+  value: string | number;
+}
+
 interface Product {
   _id: string;
   name: string;
@@ -10,7 +15,7 @@ interface Product {
   images: string[];
   category: { _id: string; name: string };
   discount?: number;
-  specifications?: any;
+  specifications?: Specification[];
 }
 
 interface Params {

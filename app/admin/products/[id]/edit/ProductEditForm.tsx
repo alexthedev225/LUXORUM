@@ -54,8 +54,12 @@ export default function ProductEditForm({ product }: ProductEditFormProps) {
       }
 
       router.push("/admin/products");
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Une erreur est survenue");
+      }
     } finally {
       setLoading(false);
     }

@@ -64,7 +64,7 @@ export function Testimonials({ testimonials }: TestimonialsProps) {
 
                 <div className="space-y-4">
                   <p className="text-zinc-300/90 font-light italic leading-relaxed group-hover:text-zinc-200/90 transition-colors duration-500">
-                    "{testimonial.quote}"
+                    {testimonial.quote}
                   </p>
                   <div className="pt-3 border-t border-zinc-800/50">
                     <p className="text-amber-200/90 font-medium text-sm">

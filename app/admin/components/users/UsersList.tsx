@@ -28,9 +28,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-
 import { Toaster } from "@/components/ui/sonner";
-import { motion } from "framer-motion";
 
 interface User {
   _id: string;
@@ -46,9 +44,8 @@ interface User {
 
 const ROLES = ["USER", "ADMIN", "MANAGER"];
 
-interface UsersAdminProps {}
 
-export default function UsersAdmin(props: UsersAdminProps) {
+export default function UsersAdmin() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -250,7 +247,7 @@ export default function UsersAdmin(props: UsersAdminProps) {
           <TableHeader>
             <TableRow>
               <TableHead>Email</TableHead>
-              <TableHead>Nom d'utilisateur</TableHead>
+              <TableHead>Nom d&apos;utilisateur</TableHead>
               <TableHead>Rôle</TableHead>
               <TableHead>Créé le</TableHead>
               <TableHead>Actions</TableHead>
@@ -285,7 +282,7 @@ export default function UsersAdmin(props: UsersAdminProps) {
             <DialogHeader>
               <DialogTitle>Éditer utilisateur</DialogTitle>
               <DialogDescription>
-                Modifier les informations de l'utilisateur
+                Modifier les informations de l&apos;utilisateur
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>

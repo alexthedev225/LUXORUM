@@ -14,7 +14,7 @@ export function AlertThresholds({ products }: { products: Product[] }) {
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">Seuils d'Alerte</h2>
+        <h2 className="text-xl font-semibold">Seuils d&apos;Alerte</h2>
         <div className="flex items-center space-x-2">
           <label className="text-sm">Seuil :</label>
           <input
@@ -45,7 +45,7 @@ export function AlertThresholds({ products }: { products: Product[] }) {
             </div>
             <div className="ml-3">
               <p className="text-sm text-yellow-700">
-                {lowStockProducts.length} produit(s) sous le seuil d'alerte
+                {lowStockProducts.length} produit(s) sous le seuil d&apos;alerte
               </p>
             </div>
           </div>

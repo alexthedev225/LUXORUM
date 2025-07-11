@@ -77,7 +77,7 @@ export function Philosophy() {
               <p className="text-base text-zinc-300/70 font-light leading-relaxed">
                 Nos maîtres artisans perpétuent un savoir-faire centenaire,
                 travaillant les matériaux les plus nobles pour créer des pièces
-                d'exception intemporelles.
+                d&apos;exception intemporelles.
               </p>
             </div>
 
@@ -132,8 +132,8 @@ export function Philosophy() {
           transition={{ duration: 0.8, delay: 0.8 }}
         >
           <blockquote className="text-zinc-100/90 font-light italic text-lg leading-relaxed">
-            "L'art de la joaillerie ne se résume pas à assembler des matériaux
-            précieux, c'est créer une émotion qui transcende le temps."
+            L&apos;art de la joaillerie ne se résume pas à assembler des matériaux
+            précieux, c&apos;est créer une émotion qui transcende le temps.
           </blockquote>
 
           <motion.div

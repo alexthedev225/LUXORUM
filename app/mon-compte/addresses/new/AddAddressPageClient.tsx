@@ -69,9 +69,13 @@ export default function AddAddressPage() {
   const [cityDropdownOpen, setCityDropdownOpen] = useState(false);
 
   // useCallback pour garder la même référence
-  const handleChange = useCallback((field: keyof FormData, value: any) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-  }, []);
+ const handleChange = useCallback(
+   (field: keyof FormData, value: string | boolean) => {
+     setForm((prev) => ({ ...prev, [field]: value }));
+   },
+   []
+ );
+
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -85,35 +89,36 @@ export default function AddAddressPage() {
   }, []);
 
   const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-      setLoading(true);
+  async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
 
-      try {
-        const response = await fetch("/api/account/addresses", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(form),
-        });
+    try {
+      const response = await fetch("/api/account/addresses", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
 
-        if (!response.ok) {
-          throw new Error("Erreur lors de l'enregistrement de l'adresse.");
-        }
-
-        await response.json();
-        toast.success("Adresse enregistrée avec succès !");
-        window.location.href = "/mon-compte/addresses";
-      } catch (err) {
-        console.error("Erreur:", err);
-        toast.error("Une erreur est survenue. Veuillez réessayer.");
-      } finally {
-        setLoading(false);
+      if (!response.ok) {
+        throw new Error("Erreur lors de l'enregistrement de l'adresse.");
       }
-    },
-    [form, router]
-  );
+
+      await response.json();
+      toast.success("Adresse enregistrée avec succès !");
+      window.location.href = "/mon-compte/addresses"; // ✅ router non utilisé
+    } catch (err) {
+      console.error("Erreur:", err);
+      toast.error("Une erreur est survenue. Veuillez réessayer.");
+    } finally {
+      setLoading(false);
+    }
+  },
+  [form] // ✅ retirer router
+);
+
 
 
 

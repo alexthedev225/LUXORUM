@@ -251,7 +251,7 @@ console.log("Filtered Products:", filteredProducts);
                 </motion.div>
 
                 <p className="text-zinc-400/90 font-light tracking-[0.2em] text-sm sm:text-base mb-8">
-                  Découvrez nos créations d'exception
+                  Découvrez nos créations d&apos;exception
                 </p>
 
                 {/* Compteur de produits avec badge animé */}
@@ -345,8 +345,8 @@ console.log("Filtered Products:", filteredProducts);
                 <div className="w-px h-8 bg-gradient-to-b from-transparent via-amber-400/50 to-transparent" />
               </div>
               <p className="text-zinc-400/90 max-w-2xl mx-auto font-light tracking-[0.1em] text-base sm:text-lg">
-                Découvrez une expérience épurée, concentrée sur l'essentiel de
-                nos créations d'exception.
+                Découvrez une expérience épurée, concentrée sur l&apos;essentiel de
+                nos créations d&apos;exception.
               </p>
             </motion.div>
           </>

@@ -8,7 +8,10 @@
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: "2023-10-16",
   });
-
+interface CartItem {
+  product: IProduct;
+  quantity: number;
+}
   export async function POST(req: Request) {
     await connect();
 
@@ -30,40 +33,38 @@
         }
 
         // Prépare les items pour Stripe
-        const line_items = cart.items.map(
-          (item: { product: IProduct; quantity: number }) => {
-            const product = item.product as unknown as IProduct;
+        const line_items = cart.items.map((item: CartItem) => {
+          const product = item.product;
 
-            if (!product) {
-              throw new Error("Produit dans panier introuvable");
-            }
-
-            const firstImage = product.images?.[0];
-            const imageUrl =
-              firstImage && firstImage.startsWith("http")
-                ? firstImage
-                : firstImage
-                ? `${origin}${
-                    firstImage.startsWith("/") ? firstImage : "/" + firstImage
-                  }`
-                : undefined;
-
-            return {
-              price_data: {
-                currency: "eur",
-                product_data: {
-                  name: product.name,
-                  description: product.description,
-                  images: imageUrl ? [imageUrl] : [],
-                },
-                unit_amount: Math.round(Number(product.price) * 100),
-              },
-              quantity: item.quantity,
-            };
+          if (!product) {
+            throw new Error("Produit dans panier introuvable");
           }
-        );
 
-        const amount = cart.items.reduce((total: number, item: { product: { price: any; }; quantity: number; }) => {
+          const firstImage = product.images?.[0];
+          const imageUrl =
+            firstImage && firstImage.startsWith("http")
+              ? firstImage
+              : firstImage
+              ? `${origin}${
+                  firstImage.startsWith("/") ? firstImage : "/" + firstImage
+                }`
+              : undefined;
+
+          return {
+            price_data: {
+              currency: "eur",
+              product_data: {
+                name: product.name,
+                description: product.description,
+                images: imageUrl ? [imageUrl] : [],
+              },
+              unit_amount: Math.round(Number(product.price) * 100),
+            },
+            quantity: item.quantity,
+          };
+        });
+
+        const amount = cart.items.reduce((total: number, item: CartItem) => {
           const price = Number(item.product?.price || 0);
           return total + price * item.quantity;
         }, 0);
@@ -100,23 +101,27 @@
 
           return NextResponse.json({ sessionId: session.id });
         }
-      } catch (error: any) {
-        console.error("Erreur paiement :", error);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          console.error("Erreur paiement :", error.message);
 
-        if (error.code === "authentication_required") {
+          if ((error as any).code === "authentication_required") {
+            return NextResponse.json(
+              {
+                requiresAction: true,
+                paymentIntentId: (error as any).raw.payment_intent.id,
+              },
+              { status: 400 }
+            );
+          }
+
+          return NextResponse.json({ error: error.message }, { status: 500 });
+        } else {
           return NextResponse.json(
-            {
-              requiresAction: true,
-              paymentIntentId: error.raw.payment_intent.id,
-            },
-            { status: 400 }
+            { error: "Erreur serveur inconnue" },
+            { status: 500 }
           );
         }
-
-        return NextResponse.json(
-          { error: error.message || "Erreur serveur" },
-          { status: 500 }
-        );
       }
     });
   }

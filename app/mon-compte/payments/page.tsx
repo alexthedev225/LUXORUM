@@ -115,7 +115,7 @@ export default async function PaymentsPage() {
                   Aucune carte enregistrée
                 </h2>
                 <p className="text-zinc-400 leading-relaxed">
-                  Vous n'avez ajouté aucune carte pour le moment.
+                  Vous n&apos;avez ajouté aucune carte pour le moment.
                   <br />
                   Enregistrez un moyen de paiement pour faciliter vos futurs
                   achats.

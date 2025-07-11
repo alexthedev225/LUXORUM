@@ -69,9 +69,9 @@ export function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.8 }}
           >
-            Chaque création raconte une histoire d'excellence et de raffinement.
-            Découvrez des bijoux conçus pour l'homme moderne qui ne fait aucun
-            compromis sur l'élégance.
+            Chaque création raconte une histoire d&apos;excellence et de raffinement.
+            Découvrez des bijoux conçus pour l&apos;homme moderne qui ne fait aucun
+            compromis sur l&apos;élégance.
           </motion.p>
 
           {/* Statistiques luxe */}

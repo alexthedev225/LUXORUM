@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, ReactNode } from "react";
+import { useState, useEffect, ReactNode, useCallback } from "react";
 import { motion } from "framer-motion";
 import {
   DollarSign,
@@ -185,7 +185,7 @@ export default function AnalyticsDashboardClient({
   const [stats, setStats] = useState<Stats>(initialStats);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
-  const handleRefresh = async () => {
+  const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
     try {
       const res = await fetch(`/api/analytics?timeRange=${timeRange}`);
@@ -197,10 +197,6 @@ export default function AnalyticsDashboardClient({
       alert("Erreur lors du chargement des données");
     }
     setIsRefreshing(false);
-  };
-
-  useEffect(() => {
-    handleRefresh();
   }, [timeRange]);
 
   return (

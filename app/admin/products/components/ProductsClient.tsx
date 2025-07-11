@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState} from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -124,7 +124,7 @@ export default function ProductsClient({
             </h2>
             <p className="text-zinc-400/90 mb-6">
               Commencez à créer votre collection luxueuse en ajoutant votre
-              premier produit d'exception.
+              premier produit d&apos;exception.
             </p>
             <Link href="/admin/products/add">
               <Button className="bg-amber-500 hover:bg-amber-600 text-black font-semibold px-6 py-3 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-[0_0_20px_rgba(245,158,11,0.4)]">

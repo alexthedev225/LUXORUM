@@ -109,7 +109,7 @@ export default async function OrdersPage() {
                   Aucune commande
                 </h2>
                 <p className="text-zinc-400 leading-relaxed">
-                  Vous n'avez effectué aucune commande pour le moment.
+                  Vous n&apos;avez effectué aucune commande pour le moment.
                   <br />
                   Découvrez notre catalogue pour passer votre première commande.
                 </p>

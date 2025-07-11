@@ -43,7 +43,7 @@ const PreferencesSection = () => {
             <div>
               <h3 className="text-white/95 font-medium">Langue</h3>
               <p className="text-zinc-400 text-sm">
-                Langue d'affichage de l'interface
+                Langue d&apos;affichage de l&apos;interface
               </p>
             </div>
           </div>
