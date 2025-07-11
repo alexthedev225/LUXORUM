@@ -8,7 +8,7 @@
     "insert:products": "node scripts/insertProducts.mjs",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "next lint --max-warnings=0",
     "setup-db": "node scripts/setup-database.mjs"
   },
   "dependencies": {

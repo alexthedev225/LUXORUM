@@ -9,7 +9,7 @@ type Step3Props = {
   >;
 };
 
-export default function Step3({ formData, setFormData }: Step3Props) {
+export default function Step3({ setFormData }: Step3Props) {
   return (
     <div className="space-y-8">
       <div className="flex flex-col">

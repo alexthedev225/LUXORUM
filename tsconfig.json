@@ -1,18 +1,24 @@
 {
   "compilerOptions": {
-    "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
+    "target": "ES2020", // ES2017 est ok, mais ES2020 est plus moderne et mieux supporté
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "allowJs": false, // ⛔️ Interdit les fichiers JS dans les projets TS
     "skipLibCheck": true,
-    "strict": true,
+    "strict": true, // ✅ Active tous les strict checks
+    "noImplicitAny": true, // ⛔️ Empêche les types `any` implicites
+    "strictNullChecks": true, // ✅ Obligatoire pour bien gérer null / undefined
+    "noUnusedLocals": true, // ⛔️ Détecte les variables inutilisées (comme Vercel)
+    "noUnusedParameters": true, // ⛔️ Idem pour les paramètres
+    "noFallthroughCasesInSwitch": true,
     "noEmit": true,
     "esModuleInterop": true,
-    "module": "esnext",
+    "module": "ESNext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "forceConsistentCasingInFileNames": true, // ✅ Catch les erreurs liées à la casse (important sur Linux/Vercel)
     "plugins": [
       {
         "name": "next"

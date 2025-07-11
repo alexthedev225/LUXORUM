@@ -1,3 +1,4 @@
+// eslint.config.js
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import { FlatCompat } from "@eslint/eslintrc";
@@ -9,8 +10,30 @@ const compat = new FlatCompat({
   baseDirectory: __dirname,
 });
 
-const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
-];
+export default [
+  ...compat.extends("next/core-web-vitals", "next", "next/typescript"),
 
-export default eslintConfig;
+  {
+    files: ["**/*.{js,ts,jsx,tsx}"],
+    languageOptions: {
+      parserOptions: {
+        ecmaVersion: "latest",
+        sourceType: "module",
+      },
+    },
+    rules: {
+      // ✅ Rend les erreurs bloquantes comme sur Vercel
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_" },
+      ],
+      "@typescript-eslint/no-explicit-any": "error",
+      "no-console": ["warn", { allow: ["warn", "error"] }],
+      "no-unused-vars": "off", // Désactivé pour laisser TypeScript gérer
+
+      // Optionnel : renforce d’autres bonnes pratiques
+      "react/self-closing-comp": "warn",
+      "react/jsx-boolean-value": ["warn", "never"],
+    },
+  },
+];
