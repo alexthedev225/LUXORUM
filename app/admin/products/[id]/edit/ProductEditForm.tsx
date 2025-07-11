@@ -6,26 +6,29 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
-type ProductEditFormProps = {
-  product: {
-    id: string | number;
-    name: string;
-    description: string;
-    price: number;
-    stock: number;
-    categoryId: string | number;
-    images: string[];
-  };
-};
+
+interface Product {
+  id: string; // correspond à _id en base, mais ici on utilise id
+  name: string;
+  description?: string | null;
+  price: number;
+  stock: number;
+  categoryId: string; // on attend un string ici (ID Mongo)
+  images?: string[] | null;
+}
+
+interface ProductEditFormProps {
+  product: Product;
+}
 
 export default function ProductEditForm({ product }: ProductEditFormProps) {
   const router = useRouter();
   const [name, setName] = useState(product.name);
-  const [description, setDescription] = useState(product.description);
+  const [description, setDescription] = useState(product.description || "");
   const [price, setPrice] = useState(product.price.toString());
   const [stock, setStock] = useState(product.stock.toString());
-  const [categoryId, setCategoryId] = useState(product.categoryId.toString());
-  const [images, setImages] = useState(product.images.join(", "));
+  const [categoryId, setCategoryId] = useState(product.categoryId);
+  const [images, setImages] = useState(product.images?.join(", ") || "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,8 +46,11 @@ export default function ProductEditForm({ product }: ProductEditFormProps) {
           description,
           price: Number(price),
           stock: Number(stock),
-          categoryId: Number(categoryId),
-          images: images.split(",").map((img) => img.trim()),
+          categoryId,
+          images: images
+            .split(",")
+            .map((img) => img.trim())
+            .filter(Boolean),
         }),
       });
 
@@ -136,7 +142,7 @@ export default function ProductEditForm({ product }: ProductEditFormProps) {
         </Label>
         <Input
           id="categoryId"
-          type="number"
+          type="text"
           value={categoryId}
           onChange={(e) => setCategoryId(e.target.value)}
           required

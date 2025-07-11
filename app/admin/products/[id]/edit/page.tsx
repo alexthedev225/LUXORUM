@@ -1,36 +1,43 @@
-// /app/admin/products/[id]/edit/page.tsx
-import { prisma } from "@/lib/prisma";
-import { Decimal } from "@prisma/client/runtime/library";
 import { notFound } from "next/navigation";
 import ProductEditForm from "./ProductEditForm";
 
-interface ProductEditPageProps {
-  params: { id: string };
+interface Product {
+  _id: string;
+  name: string;
+  description?: string | null;
+  price: number;
+  stock: number;
+  category: string; // ou string | undefined selon ta data
+  images?: string[] | null;
 }
 
-export default async function ProductEditPage({
-  params,
-}: ProductEditPageProps) {
-  const productId = Number(params.id);
-  if (isNaN(productId)) return notFound();
 
-  const productRaw = await prisma.product.findUnique({
-    where: { id: productId },
-  });
 
-  if (!productRaw) return notFound();
+export default async function ProductEditPage({ params }: { params: { id: string } }) {
+  const productId = params.id;
 
-  // Conversion manuelle avec typage strict
+  // Appel à ton API locale
+  const res = await fetch(
+    `${process.env.BASE_URL || ""}/api/products/${productId}`,
+    {
+      cache: "no-store", // désactive cache pour données à jour
+    }
+  );
+
+  if (!res.ok) {
+    return notFound();
+  }
+
+  const productRaw: Product = await res.json();
+
+  // Si tu veux adapter le format, fais-le ici
   const product = {
-    id: productRaw.id,
+    id: productRaw._id,
     name: productRaw.name,
     description: productRaw.description,
-    price:
-      productRaw.price instanceof Decimal
-        ? productRaw.price.toNumber()
-        : Number(productRaw.price),
+    price: productRaw.price,
     stock: productRaw.stock,
-    categoryId: productRaw.categoryId,
+    categoryId: productRaw.category, // adapte selon champ category réel
     images: productRaw.images,
   };
 
