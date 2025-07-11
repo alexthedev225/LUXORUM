@@ -60,7 +60,7 @@ export async function PUT(req: Request) {
 }
 
 export async function DELETE(req: Request) {
-  return withAuth(req, async (req, user) => {
+  return withAuth(req, async (_req, user) => {
     await dbConnect();
 
     const currentUser = await User.findById(user.userId);

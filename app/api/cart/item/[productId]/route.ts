@@ -31,7 +31,7 @@ export async function DELETE(
 
       // Vérifier si produit est dans le panier
       const itemIndex = cart.items.findIndex(
-        (item) => item.product.toString() === productId
+        (item: { product: { toString: () => string; }; }) => item.product.toString() === productId
       );
 
       if (itemIndex === -1) {

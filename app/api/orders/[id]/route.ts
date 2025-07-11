@@ -3,7 +3,6 @@ import Order from "@/models/Order";
 import  connectToDB  from "@/lib/mongoose";
 
 export async function GET(
-  req: Request,
   { params }: { params: { id: string } }
 ) {
   try {
