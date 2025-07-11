@@ -1,7 +1,15 @@
-import AccountPageWrapper from "./AccountPageWrapper";
+// app/mon-compte/page.tsx
+"use client";
 
-export default function page() {
-  return (
-    <AccountPageWrapper/>
-  );
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+
+export default function RedirectToDefaultSection() {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace("/mon-compte/profile");
+  }, [router]);
+
+  return null;
 }

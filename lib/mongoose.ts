@@ -32,14 +32,24 @@ async function connect(): Promise<Mongoose> {
 
   if (!cached!.promise) {
     const opts = {
-      // options mongoose 7+ (pas besoin d'ajouter useNewUrlParser etc)
+      serverSelectionTimeoutMS: 10000, // Attend jusqu'à 10s pour trouver un nœud
+      socketTimeoutMS: 20000, // Garde les sockets ouverts jusqu’à 20s
+      connectTimeoutMS: 15000, // Laisse 15s pour établir la connexion
+      retryWrites: true,
+      w: "majority",
     };
 
-    cached!.promise = mongoose
-      .connect(MONGODB_URI!, opts)
-      .then((mongooseInstance) => {
-        return mongooseInstance;
-      });
+   cached!.promise = mongoose
+     .connect(MONGODB_URI!, opts)
+     .then((mongooseInstance) => {
+       console.log("✅ Connected to MongoDB");
+       return mongooseInstance;
+     })
+     .catch((err) => {
+       console.error("❌ Failed to connect to MongoDB:", err);
+       throw err;
+     });
+
   }
   cached!.conn = await cached!.promise;
   return cached!.conn;

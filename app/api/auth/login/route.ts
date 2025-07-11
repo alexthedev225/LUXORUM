@@ -7,6 +7,11 @@ import { Redis } from "@upstash/redis";
 import { verifyRecaptchaToken } from "@/lib/recaptcha";
 import { validateCsrfToken } from "@/lib/csrf";
 import * as jose from "jose";
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2023-10-16",
+});
 
 import User from "@/models/User";
 
@@ -93,7 +98,15 @@ export async function POST(req: Request) {
         { status: 401 }
       );
     }
-
+    // --- Ajout création stripeCustomerId si absent ---
+    if (!user.stripeCustomerId) {
+      const customer = await stripe.customers.create({
+        email: user.email,
+        name: user.username || user.email,
+      });
+      user.stripeCustomerId = customer.id;
+      await user.save();
+    }
     // 6. Vérification du secret JWT
     if (!process.env.JWT_SECRET) {
       throw new Error(
@@ -107,6 +120,7 @@ export async function POST(req: Request) {
       userId: user._id.toString(),
       email: user.email,
       role: user.role,
+      stripeCustomerId: user.stripeCustomerId, // <-- bien ici
     })
       .setProtectedHeader({ alg: "HS256" })
       .setExpirationTime("24h")

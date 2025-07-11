@@ -29,10 +29,9 @@ const Modal = ({
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
-          className="relative bg-gradient-to-br from-zinc-900 via-black to-zinc-900 rounded-2xl border border-amber-400/20 p-6 w-full max-w-md shadow-2xl"
+          className="relative bg-black rounded-2xl border border-neutral-800/80 p-6 w-full max-w-md shadow-2xl"
         >
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-light text-white/95">{title}</h3>
             <button
               onClick={onClose}
               className="text-zinc-400 hover:text-white transition-colors"

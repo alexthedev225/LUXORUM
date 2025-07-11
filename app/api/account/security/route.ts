@@ -1,3 +1,4 @@
+//api/account/security
 import User from "@/models/User";
 import dbConnect from "@/lib/mongoose";
 import { withAuth } from "@/utils/withAuth";
@@ -55,5 +56,24 @@ export async function PUT(req: Request) {
       console.error("Erreur PUT security", error);
       return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
     }
+  });
+}
+
+export async function DELETE(req: Request) {
+  return withAuth(req, async (req, user) => {
+    await dbConnect();
+
+    const currentUser = await User.findById(user.userId);
+
+    if (!currentUser) {
+      return NextResponse.json(
+        { message: "Utilisateur non trouvé" },
+        { status: 404 }
+      );
+    }
+
+    await User.deleteOne({ _id: user.userId });
+
+    return NextResponse.json({ message: "Compte supprimé définitivement" });
   });
 }

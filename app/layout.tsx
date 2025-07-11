@@ -2,14 +2,33 @@
 import LayoutClient from "@/components/layout/LayoutClient";
 import "./globals.css";
 import { getSettings } from "@/lib/api/getSettings"; // à créer côté serveur
+import * as jose from "jose";
+import { cookies } from "next/headers";
+
+const SECRET = process.env.JWT_SECRET!;
 
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // Récupère les settings côté serveur (MongoDB, fichier, etc.)
   const settings = await getSettings();
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
+
+  let isAdmin = false;
+  if (token) {
+    try {
+      const { payload } = await jose.jwtVerify(
+        token,
+        new TextEncoder().encode(SECRET)
+      );
+      isAdmin = payload.role === "ADMIN";
+    } catch {
+      // token invalide ou expiré
+      isAdmin = false;
+    }
+  }
 
   return (
     <html lang={settings.language || "fr"}>
@@ -22,8 +41,13 @@ export default async function RootLayout({
         />
       </head>
       <body>
-        {/* Passer settings en props pour initialiser Zustand côté client */}
-        <LayoutClient initialSettings={settings}>{children}</LayoutClient>
+        <LayoutClient
+          initialSettings={settings}
+          isAdmin={isAdmin}
+          isAuthenticated={!!token}
+        >
+          {children}
+        </LayoutClient>
       </body>
     </html>
   );

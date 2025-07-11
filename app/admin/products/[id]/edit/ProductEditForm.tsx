@@ -6,6 +6,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
+type ProductEditFormProps = {
+  product: {
+    id: string | number;
+    name: string;
+    description: string;
+    price: number;
+    stock: number;
+    categoryId: string | number;
+    images: string[];
+  };
+};
 
 export default function ProductEditForm({ product }: ProductEditFormProps) {
   const router = useRouter();

@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,7 @@ import {
   SheetTrigger,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Menu, User, ShoppingBag, ChevronDown } from "lucide-react";
+import { Menu, User, ShoppingBag, ChevronDown, LogOut, X } from "lucide-react";
 import { motion } from "framer-motion";
 import {
   NavigationMenu,
@@ -19,7 +20,9 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { useIsAuthOrAdminPage } from "@/hooks/useIsAuthPage";
-import { useCartStore } from "@/stores/cart"; // adapte le chemin exact
+import { useCartStore } from "@/stores/cart";
+import { useLogout } from "@/hooks/useLogout";
+import toast from "react-hot-toast";
 
 const routes = [
   { name: "Accueil", path: "/" },
@@ -54,17 +57,23 @@ const categories = [
   },
 ];
 
-export function Navbar() {
+interface NavbarProps {
+  isAdmin: boolean;
+  isAuthenticated: boolean;
+}
+
+export function Navbar({ isAdmin, isAuthenticated }: NavbarProps) {
   const isAuthPage = useIsAuthOrAdminPage();
 
   const [isScrolled, setIsScrolled] = useState(false);
   const { getTotalItems } = useCartStore();
   const totalItems = getTotalItems();
+  const { logout, loading } = useLogout();
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
-
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -73,16 +82,21 @@ export function Navbar() {
 
   return (
     <header className="fixed w-full top-4 z-50">
-      <nav className="px-4 mx-2  relative">
+      <nav
+        className={clsx(
+          "px-4 relative transition-all duration-500 mx-2",
+          isScrolled ? "lg:mx-20" : ""
+        )}
+      >
         {/* Background avec transition */}
         <div
           className={`absolute inset-0 transition-all duration-300 rounded-2xl border border-zinc-800/50 ${
-            isScrolled ? "bg-black/82 " : "bg-black"
+            isScrolled ? "bg-black/82" : "bg-black"
           } backdrop-blur-xs`}
         />
 
         <div className="relative px-4 lg:px-6 h-20 flex items-center justify-between">
-          {/* Logo avec transition */}
+          {/* Logo (toujours visible) */}
           <Link href="/" className="shrink-0">
             <motion.span
               className="font-serif sm:text-lg text-amber-200/90 hover:text-amber-200 transition-colors duration-500 cinzel-decorative-black"
@@ -94,9 +108,8 @@ export function Navbar() {
             </motion.span>
           </Link>
 
-          {/* Navigation Desktop avec transitions */}
+          {/* Navigation Desktop */}
           <div className="hidden lg:flex items-center space-x-6 lg:space-x-8">
-            {/* Menu Collections comme navigation principale */}
             <NavigationMenu>
               <NavigationMenuList>
                 <NavigationMenuItem>
@@ -118,7 +131,6 @@ export function Navbar() {
                   <NavigationMenuContent>
                     <div className="w-[600px] bg-black/95 backdrop-blur-xl border border-zinc-800/50 rounded-xl overflow-hidden">
                       <div className="grid grid-cols-2 gap-0.5 bg-zinc-800/50">
-                        {/* Lien "Voir toute la boutique" */}
                         <Link
                           href="/boutique"
                           className="col-span-2 block bg-black/95 p-6 transition-all duration-300 hover:bg-zinc-900/90 group border-b border-zinc-800/50"
@@ -137,7 +149,6 @@ export function Navbar() {
                             </span>
                           </div>
                         </Link>
-                        {/* Catégories existantes */}
                         {categories.map((category) => (
                           <Link
                             key={category.name}
@@ -164,7 +175,6 @@ export function Navbar() {
               </NavigationMenuList>
             </NavigationMenu>
 
-            {/* Routes restantes */}
             {routes.map((route) => (
               <Link
                 key={route.path}
@@ -179,96 +189,174 @@ export function Navbar() {
             ))}
           </div>
 
-          {/* Actions avec transitions */}
-          <div className="flex items-center gap-1">
-            {/* Actions avec transitions */}
-            <div className="flex items-center gap-1">
-              {/* Bouton Panier avec badge */}
-              <Link
-                href="/cart"
-                className="w-10 h-10 rounded-full hover:bg-zinc-800/50 transition-colors duration-300 bg-black relative inline-flex items-center justify-center"
-              >
-                <ShoppingBag className="w-5 h-5 text-zinc-100 hover:text-amber-200 transition-colors duration-300" />
+          {/* Actions Desktop (panier, compte, logout) */}
+          <div className="hidden lg:flex items-center gap-1">
+            <Link
+              href="/cart"
+              className="w-10 h-10 rounded-full hover:bg-zinc-800/50 transition-colors duration-300 bg-black relative inline-flex items-center justify-center"
+            >
+              <ShoppingBag className="w-5 h-5 text-zinc-100 hover:text-amber-200 transition-colors duration-300" />
 
-                {totalItems > 0 && (
-                  <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-[10px] font-bold leading-none text-black bg-amber-400 rounded-full transform translate-x-1/2 -translate-y-1/2">
-                    {totalItems}
-                  </span>
+              {totalItems > 0 && (
+                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-[10px] font-bold leading-none text-black bg-amber-400 rounded-full transform translate-x-1/2 -translate-y-1/2">
+                  {totalItems}
+                </span>
+              )}
+            </Link>
+
+            <Link
+              href="/mon-compte"
+              className="inline-flex items-center justify-center w-10 h-10 rounded-full hover:bg-zinc-800/50 transition-colors duration-300 bg-black"
+            >
+              <User className="w-5 h-5 text-zinc-100 hover:text-amber-200 transition-colors duration-300" />
+            </Link>
+
+            {isAuthenticated && (
+              <button
+                onClick={() => {
+                  logout(() => {
+                    toast.success("Déconnexion réussie");
+
+                    setTimeout(() => {
+                      window.location.reload();
+                    }, 2000);
+                  });
+                }}
+                disabled={loading}
+                className="text-red-500 ml-10"
+                aria-label="Se déconnecter"
+              >
+                {loading ? (
+                  <span className="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                ) : (
+                  <LogOut className="inline-block w-7 h-7" />
                 )}
-              </Link>
-
-              {/* Bouton Utilisateur */}
-              <Link
-                href="/admin"
-                className="inline-flex items-center justify-center w-10 h-10 rounded-full hover:bg-zinc-800/50 transition-colors duration-300 bg-black"
-              >
-                <User className="w-5 h-5 text-zinc-100 hover:text-amber-200 transition-colors duration-300" />
-              </Link>
-            </div>
-
-            {/* Menu Mobile */}
-            <Sheet>
-              <SheetTrigger asChild className="lg:hidden">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="w-10 h-10 rounded-full hover:bg-zinc-800/90 transition-colors duration-300 bg-black"
-                >
-                  <Menu className="w-5 h-5 text-zinc-100 hover:text-amber-200 transition-colors duration-300" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent
-                side="right"
-                className={`w-full max-w-md backdrop-blur-xl border-l overflow-y-auto transition-colors duration-300 ${
-                  isScrolled
-                    ? "bg-black/70 border-zinc-800/50"
-                    : "bg-black/90 border-zinc-800/50"
-                }`}
-              >
-                <SheetTitle className="text-4xl font-serif p-6 text-amber-200 transition-colors duration-300">
-                  LUXORUM
-                </SheetTitle>
-                <nav className="mt-16 px-6 pb-16">
-                  {routes.map((route) => (
-                    <Link
-                      key={route.path}
-                      href={route.path}
-                      className="block py-4 text-sm uppercase tracking-wider text-zinc-100 hover:text-amber-200 transition-colors duration-300"
-                    >
-                      {route.name}
-                    </Link>
-                  ))}
-
-                  <div className="py-6 border-t mt-6">
-                    <h3 className="text-sm uppercase tracking-wider mb-4 text-zinc-500 transition-colors duration-300">
-                      Collections
-                    </h3>
-                    <div className="space-y-6">
-                      {categories.map((category) => (
-                        <Link
-                          key={category.name}
-                          href={category.href}
-                          className="block group"
-                        >
-                          <div className="space-y-1">
-                            <h4 className="text-sm font-medium text-zinc-100 hover:text-amber-200 transition-colors duration-300">
-                              {category.name}
-                            </h4>
-                            <p className="text-xs text-zinc-100 transition-colors duration-300">
-                              {category.description}
-                            </p>
-                            <p className="text-xs italic text-zinc-100 transition-colors duration-300">
-                              {category.position}
-                            </p>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                </nav>
-              </SheetContent>
-            </Sheet>
+              </button>
+            )}
           </div>
+
+          {/* Bouton Menu Mobile */}
+          <Sheet>
+            <SheetTrigger asChild className="lg:hidden">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="w-10 h-10 rounded-full hover:bg-zinc-800/90 transition-colors duration-300 bg-black"
+                aria-label="Ouvrir le menu"
+              >
+                <Menu className="w-5 h-5 text-zinc-100 hover:text-amber-200 transition-colors duration-300" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent
+              side="right"
+              className={clsx(
+                "w-full max-w-md backdrop-blur-xl border-l overflow-y-auto transition-colors duration-300",
+                isScrolled
+                  ? "bg-black/70 border-zinc-800/50"
+                  : "bg-black/90 border-zinc-800/50"
+              )}
+            >
+              <SheetTitle className="text-4xl font-serif p-6 text-amber-200 transition-colors duration-300 flex justify-between items-center">
+                LUXORUM
+                <SheetTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-amber-200"
+                  >
+                    <X className="w-6 h-6" aria-label="Fermer le menu" />
+                  </Button>
+                </SheetTrigger>
+              </SheetTitle>
+
+              <nav className="mt-8 px-6 pb-16 space-y-6">
+                {routes.map((route) => (
+                  <Link
+                    key={route.path}
+                    href={route.path}
+                    className="block py-4 text-sm uppercase tracking-wider text-zinc-100 hover:text-amber-200 transition-colors duration-300"
+                  >
+                    {route.name}
+                  </Link>
+                ))}
+
+                {isAdmin && (
+                  <Link
+                    href="/admin"
+                    className="block py-2 text-sm uppercase tracking-wider font-light text-red-500 hover:text-amber-400 transition-colors duration-300"
+                  >
+                    ADMIN
+                  </Link>
+                )}
+
+                <div>
+                  <h3 className="text-sm uppercase tracking-wider mb-4 text-zinc-500">
+                    Collections
+                  </h3>
+                  <div className="space-y-4">
+                    {categories.map((category) => (
+                      <Link
+                        key={category.name}
+                        href={category.href}
+                        className="block group"
+                      >
+                        <h4 className="text-sm font-medium text-zinc-100 hover:text-amber-200 transition-colors duration-300">
+                          {category.name}
+                        </h4>
+                        <p className="text-xs text-zinc-100 transition-colors duration-300">
+                          {category.description}
+                        </p>
+                        <p className="text-xs italic text-zinc-100 transition-colors duration-300">
+                          {category.position}
+                        </p>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="border-t border-zinc-800 pt-6 space-y-4">
+                  <Link
+                    href="/cart"
+                    className="flex items-center gap-3 text-zinc-100 hover:text-amber-200 transition-colors duration-300"
+                  >
+                    <ShoppingBag className="w-5 h-5" />
+                    Panier {totalItems > 0 && `(${totalItems})`}
+                  </Link>
+
+                  <Link
+                    href="/mon-compte"
+                    className="flex items-center gap-3 text-zinc-100 hover:text-amber-200 transition-colors duration-300"
+                  >
+                    <User className="w-5 h-5" />
+                    Mon compte
+                  </Link>
+
+                  {isAuthenticated && (
+                    <button
+                      onClick={() => {
+                        logout(() => {
+                          toast.success("Déconnexion réussie");
+                          setTimeout(() => window.location.reload(), 2000);
+                        });
+                      }}
+                      disabled={loading}
+                      className="flex items-center gap-3 text-red-500 hover:text-amber-400 transition-colors duration-300"
+                      aria-label="Se déconnecter"
+                    >
+                      {loading ? (
+                        <span className="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                      ) : (
+                        <>
+                          <LogOut className="w-5 h-5" />
+                          Déconnexion
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+              </nav>
+            </SheetContent>
+          </Sheet>
         </div>
       </nav>
     </header>

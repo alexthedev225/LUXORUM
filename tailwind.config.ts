@@ -10,6 +10,9 @@ const config = {
   ],
   theme: {
     extend: {
+      blur: {
+        "2px": "2px",
+      },
       colors: {
         gold: "#D4AF37",
         dark: "#0B0B0B",

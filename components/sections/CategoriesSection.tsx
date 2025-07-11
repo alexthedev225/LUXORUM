@@ -2,16 +2,38 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Crown, Diamond, Watch, Gem } from "lucide-react";
+import {
+  ArrowRight,
+  Crown,
+  Diamond,
+  Watch,
+  Gem,
+  LucideIcon,
+} from "lucide-react";
 
-// Simulation du composant Link de Next.js
-const Link = ({ href, children, className, ...props }) => (
+// Typage du composant Link (simulé ici comme un <a>)
+interface LinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
+  href: string;
+  children: React.ReactNode;
+}
+const Link: React.FC<LinkProps> = ({ href, children, className, ...props }) => (
   <a href={href} className={className} {...props}>
     {children}
   </a>
 );
 
-const categories = [
+// Typage d'une catégorie
+interface Category {
+  name: string;
+  description: string;
+  href: string;
+  position: string;
+  icon: LucideIcon;
+  gradient: string;
+  accent: string;
+}
+
+const categories: Category[] = [
   {
     name: "Montres",
     description: "Chronographes & Automatiques",

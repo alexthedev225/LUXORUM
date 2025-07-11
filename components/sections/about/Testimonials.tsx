@@ -1,11 +1,19 @@
-// Testimonials.tsx
 "use client";
 
 import { motion } from "framer-motion";
 
+export interface Testimonial {
+  quote: string;
+  author: string;
+  title: string;
+  rating: number; // ex: 1 à 5
+}
 
+interface TestimonialsProps {
+  testimonials: Testimonial[];
+}
 
-export function Testimonials({ testimonials }) {
+export function Testimonials({ testimonials }: TestimonialsProps) {
   return (
     <section className="relative py-16 overflow-hidden bg-black rounded-2xl">
       <div className="container mx-auto px-6">

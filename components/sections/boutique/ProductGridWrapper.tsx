@@ -24,12 +24,14 @@ async function fetchProducts() {
 export default async function ProductGridWrapper() {
   const categories = await fetchCategories();
   const productsData = await fetchProducts();
+console.dir(productsData.products[0], { depth: null });
 
   return (
     <ProductGrid
       categories={categories}
       allProducts={productsData.products}
       defaultCategory="Tous"
+      productCardVariant="boutique"
     />
   );
 }

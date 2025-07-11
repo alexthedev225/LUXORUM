@@ -5,18 +5,33 @@ import { FeaturedProducts } from "@/components/sections/FeaturedProducts";
 import { AboutSection } from "@/components/sections/AboutSection";
 
 type Product = {
-  id: string | number;
+  _id: string;
   name: string;
-  price: number;
   description: string;
-  image: string;
-  tag?: string;
-  category: string;
+  price: number;
+  stock: string; // Tu peux changer en number si tu préfères
+  images: string[];
+  category: {
+    _id: string;
+    name: string;
+  };
+
   specifications: {
+    materials: string;
+    finish: string;
+    certificate: string;
     collection: string;
     additionalDetails?: string[];
+    stats: {
+      craftsmanship: string;
+      rarity: string;
+      prestige: string;
+      durability: string;
+    };
+    detailedDescription: string;
   };
-  stats: Record<string, number>;
+  tag?: string;
+  discount?: string;
 };
 
 // Fonction utilitaire pour récupérer les produits côté serveur
@@ -50,7 +65,7 @@ export default async function Home() {
     products = await fetchProducts();
 
     // Trier par id décroissant (les derniers produits)
-    products = products.sort((a, b) => Number(b.id) - Number(a.id)).slice(0, 3);
+    products = products.sort((a, b) => Number(b._id) - Number(a._id)).slice(0, 3);
   } catch (error) {
     console.error(error);
     // tu peux gérer une fallback UI ici si besoin

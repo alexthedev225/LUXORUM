@@ -14,7 +14,7 @@ export async function GET() {
 
     const enrichedOrders = orders.map((order) => ({
       ...order,
-      items: order.items.map((item) => {
+      items: order.items.map((item: { product: any; name: any; price: any; quantity: any; }) => {
         const product = item.product;
 
         return {

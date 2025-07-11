@@ -338,7 +338,7 @@ export default function ProductEditForm({ initialProduct, productId }: Props) {
                     <div onSubmit={handleSubmit} className="space-y-6">
                       {/* Nom du produit */}
                       <div>
-                        <label className="block text-sm font-medium text-zinc-300/90 mb-2 flex items-center gap-2">
+                        <label className="text-sm font-medium text-zinc-300/90 mb-2 flex items-center gap-2">
                           <Package className="w-4 h-4 text-amber-400" />
                           Nom du produit
                         </label>
@@ -356,7 +356,7 @@ export default function ProductEditForm({ initialProduct, productId }: Props) {
 
                       {/* Description */}
                       <div>
-                        <label className="block text-sm font-medium text-zinc-300/90 mb-2">
+                        <label className="text-sm font-medium text-zinc-300/90 mb-2">
                           Description
                         </label>
                         <motion.textarea
@@ -374,7 +374,7 @@ export default function ProductEditForm({ initialProduct, productId }: Props) {
                       {/* Prix, Stock, Remise */}
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
-                          <label className="block text-sm font-medium text-zinc-300/90 mb-2 flex items-center gap-2">
+                          <label className="text-sm font-medium text-zinc-300/90 mb-2 flex items-center gap-2">
                             <Euro className="w-4 h-4 text-amber-400" />
                             Prix (€)
                           </label>
@@ -392,7 +392,7 @@ export default function ProductEditForm({ initialProduct, productId }: Props) {
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-zinc-300/90 mb-2 flex items-center gap-2">
+                          <label className="text-sm font-medium text-zinc-300/90 mb-2 flex items-center gap-2">
                             <Package className="w-4 h-4 text-amber-400" />
                             Stock
                           </label>
@@ -409,7 +409,7 @@ export default function ProductEditForm({ initialProduct, productId }: Props) {
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-zinc-300/90 mb-2 flex items-center gap-2">
+                          <label className="text-sm font-medium text-zinc-300/90 mb-2 flex items-center gap-2">
                             <Percent className="w-4 h-4 text-amber-400" />
                             Remise (%)
                           </label>
@@ -428,7 +428,7 @@ export default function ProductEditForm({ initialProduct, productId }: Props) {
 
                       {/* Catégorie */}
                       <div>
-                        <label className="block text-sm font-medium text-zinc-300/90 mb-2 flex items-center gap-2">
+                        <label className="text-sm font-medium text-zinc-300/90 mb-2 flex items-center gap-2">
                           <Tag className="w-4 h-4 text-amber-400" />
                           Catégorie (ID)
                         </label>
@@ -445,7 +445,7 @@ export default function ProductEditForm({ initialProduct, productId }: Props) {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-zinc-300/90 mb-2 flex items-center gap-2">
+                        <label className="text-sm font-medium text-zinc-300/90 mb-2 flex items-center gap-2">
                           <Upload className="w-4 h-4 text-amber-400" />
                           Image (1 fichier)
                         </label>

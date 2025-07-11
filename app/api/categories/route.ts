@@ -1,28 +1,34 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongoose"; // ta fonction de connexion à MongoDB
 import Category from "@/models/Category";
-import "@/models/Product"; // ou le bon chemin absolu/relatif vers ton modèle Product
+import Product from "@/models/Product"; // ou le bon chemin absolu/relatif vers ton modèle Product
 
 export async function GET() {
   await dbConnect();
   try {
     // Récupérer toutes les catégories et compter les produits liés
-    const categories = await Category.find()
-      .populate("products") // populate si tu veux récupérer les produits
-      .exec();
+    const categories = await Category.find().exec();
 
-    // Ajouter le compte des produits à chaque catégorie (sans renvoyer tous les produits)
-    const categoriesWithCount = categories.map((cat) => ({
-      _id: cat._id,
-      name: cat.name,
-      description: cat.description,
-      slug: cat.slug,
-      position: cat.position,
-      longDescription: cat.longDescription,
-      productsCount: cat.products.length,
-      createdAt: cat.createdAt,
-      updatedAt: cat.updatedAt,
-    }));
+    const categoriesWithCount = await Promise.all(
+      categories.map(async (cat) => {
+        const productsCount = await Product.countDocuments({
+          category: cat._id,
+        });
+
+        return {
+          _id: cat._id,
+          name: cat.name,
+          description: cat.description,
+          slug: cat.slug,
+          position: cat.position,
+          longDescription: cat.longDescription,
+          productsCount,
+          createdAt: cat.createdAt,
+          updatedAt: cat.updatedAt,
+        };
+      })
+    );
+
 
     return NextResponse.json(categoriesWithCount);
   } catch (error) {

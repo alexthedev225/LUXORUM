@@ -1,5 +1,12 @@
 import { motion } from "framer-motion";
 import { Star, Zap, ShoppingBag } from "lucide-react";
+
+interface ProductSpecifications {
+  materials?: string;
+  finish?: string;
+  certificate?: string;
+  additionalDetails?: string[];
+}
 export default function ProductSpecs({
   specifications,
 }: {

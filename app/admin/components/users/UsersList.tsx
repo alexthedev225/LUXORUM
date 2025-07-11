@@ -85,11 +85,7 @@ export default function UsersAdmin(props: UsersAdminProps) {
       setUsers(data.users);
       setTotal(data.total);
     } catch (err) {
-      toast({
-        title: "Erreur",
-        description: (err as Error).message,
-        variant: "destructive",
-      });
+      toast.error((err as Error).message);
     } finally {
       setLoading(false);
     }
@@ -129,18 +125,11 @@ export default function UsersAdmin(props: UsersAdminProps) {
         const errData = await res.json();
         throw new Error(errData.message || "Erreur suppression utilisateur");
       }
-      toast({
-        title: "Utilisateur supprimé",
-        variant: "success",
-      });
+      toast.success("Utilisateur supprimé");
       closeDelete();
       fetchUsers();
     } catch (error) {
-      toast({
-        title: "Erreur",
-        description: (error as Error).message,
-        variant: "destructive",
-      });
+      toast.error((error as Error).message);
     }
   }
 
@@ -157,18 +146,11 @@ export default function UsersAdmin(props: UsersAdminProps) {
         const errData = await res.json();
         throw new Error(errData.message || "Erreur mise à jour utilisateur");
       }
-      toast({
-        title: "Utilisateur mis à jour",
-        variant: "success",
-      });
+      toast.success("Utilisateur mis à jour");
       closeEdit();
       fetchUsers();
     } catch (error) {
-      toast({
-        title: "Erreur",
-        description: (error as Error).message,
-        variant: "destructive",
-      });
+      toast.error((error as Error).message);
     }
   }
 
@@ -204,7 +186,7 @@ export default function UsersAdmin(props: UsersAdminProps) {
               user.role === "ADMIN"
                 ? "destructive"
                 : user.role === "MANAGER"
-                ? "warning"
+                ? "secondary" // ou "outline"
                 : "default"
             }
           >

@@ -4,7 +4,8 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-
+import { useLogout } from "@/hooks/useLogout";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import Cookies from "js-cookie";
 import {
@@ -27,16 +28,17 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
+  const { logout, loading } = useLogout();
 
   const handleLogout = () => {
-    Cookies.remove("userId");
-    Cookies.remove("userRole");
-    router.push("/admin/login");
+    logout(() => {
+      toast.success("Déconnexion réussie");
+      window.location.href = "/admin/login"; 
+    });
   };
 
   const menuItems = [
@@ -70,11 +72,7 @@ export default function AdminLayout({
       label: "Statistiques",
       icon: <BarChart3 className="h-5 w-5" />,
     },
-    {
-      path: "/admin/settings",
-      label: "Paramètres",
-      icon: <Settings className="h-5 w-5" />,
-    },
+    
   ];
 
   const sidebarVariants = {
@@ -142,9 +140,6 @@ export default function AdminLayout({
         initial="hidden"
         animate="visible"
       >
-        {/* Lueur dorée subtile sur le bord */}
-        <div className="absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-amber-400/20 to-transparent" />
-
         {/* Header de la sidebar */}
         <div className="relative flex h-16 items-center justify-center border-b border-zinc-800/90 bg-gradient-to-r from-black/60 to-transparent">
           <motion.div
@@ -161,7 +156,7 @@ export default function AdminLayout({
           </motion.div>
 
           {/* Effet de lueur subtile */}
-          <div className="absolute inset-0 bg-gradient-to-t from-amber-400/5 to-transparent pointer-events-none" />
+          <div className="absolute inset-0  pointer-events-none" />
         </div>
 
         {/* Navigation */}
@@ -243,9 +238,16 @@ export default function AdminLayout({
               variant="ghost"
               className="w-full flex items-center justify-start gap-3 px-4 py-3 text-left rounded-lg text-zinc-400 hover:text-red-300 hover:bg-red-500/10 transition-all duration-200"
               onClick={handleLogout}
+              disabled={loading} 
             >
-              <LogOut className="h-5 w-5" />
-              <span className="font-medium tracking-wide">Déconnexion</span>
+              {loading ? (
+                <span className="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+              ) : (
+                <>
+                  <LogOut className="h-5 w-5" />
+                  <span className="font-medium tracking-wide">Déconnexion</span>
+                </>
+              )}
             </Button>
           </motion.div>
         </nav>
@@ -367,9 +369,6 @@ export default function AdminLayout({
       <div className="flex flex-1 flex-col overflow-hidden lg:pl-64">
         {/* Header principal */}
         <header className="relative flex h-16 items-center justify-between border-b border-zinc-800/90 bg-gradient-to-r from-zinc-950/90 via-black/80 to-zinc-950/90 px-6 backdrop-blur-md">
-          {/* Lueur dorée subtile en arrière-plan */}
-          <div className="absolute inset-0 bg-gradient-to-t from-amber-400/5 to-transparent pointer-events-none" />
-
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
               variant="ghost"

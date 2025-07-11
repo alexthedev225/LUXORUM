@@ -52,7 +52,7 @@ export default function CategoryButton({
       onClick={() => onClick(category)}
       className={`group relative px-8 py-4 text-sm tracking-[0.3em] uppercase rounded-2xl 
         transition-all duration-700 overflow-hidden cursor-pointer backdrop-blur-sm
-        border transition-colors ${
+        border  ${
           isSelected
             ? "text-amber-300/90 border-amber-400/30 bg-gradient-to-br from-zinc-900 via-black to-zinc-900"
             : "text-zinc-400/90 border-zinc-800/50 bg-black/60 hover:text-amber-200/80 hover:border-amber-400/20"

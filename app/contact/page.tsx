@@ -496,9 +496,9 @@ function ContactInfo() {
 export default function ContactPage() {
   return (
     <div className="min-h-screen  via-zinc-950 to-black">
-      <div className="space-y-2                                                                                    pb-8">
+      <div className="space-y-2 mb-2">
         <ContactHero />
-        <div className="container mx-auto ">
+        <div className="">
           <motion.div
             className="bg-black backdrop-blur-sm border border-zinc-800/30 rounded-2xl p-8 md:p-12 relative overflow-hidden"
             initial={{ opacity: 0, y: 20 }}

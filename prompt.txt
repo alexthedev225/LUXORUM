@@ -1,516 +1,90 @@
- Profile Management
-GET /api/account/profile
-
-PUT /api/account/profileimport User from "@/models/User";
-import dbConnect from "@/lib/mongoose";
-import { withAuth } from "@/utils/withAuth";
-import { NextResponse } from "next/server";
-import { z } from "zod";
-
-const profileUpdateSchema = z.object({
-  firstName: z.string().min(1).optional(),
-  lastName: z.string().min(1).optional(),
-  phone: z.string().min(5).max(20).optional(),
-  // email non modifiable ici (à adapter si besoin)
-});
-
-export async function GET(req: Request) {
-  return withAuth(req, async (_req, user) => {
-    await dbConnect();
-
-    try {
-      const foundUser = await User.findById(user.userId)
-        .select("firstName lastName email phone")
-        .lean();
-
-      if (!foundUser) {
-        return NextResponse.json(
-          { message: "Utilisateur non trouvé" },
-          { status: 404 }
-        );
-      }
-
-      return NextResponse.json(foundUser);
-    } catch (error) {
-      console.error("Erreur GET profile", error);
-      return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
-    }
-  });
-}
-
-export async function PUT(req: Request) {
-  return withAuth(req, async (req, user) => {
-    await dbConnect();
-
-    try {
-      const data = await req.json();
-
-      const parseResult = profileUpdateSchema.safeParse(data);
-      if (!parseResult.success) {
-        return NextResponse.json(
-          { message: "Données invalides", errors: parseResult.error.errors },
-          { status: 400 }
-        );
-      }
-
-      const updatedUser = await User.findByIdAndUpdate(
-        user.userId,
-        parseResult.data,
-        {
-          new: true,
-          runValidators: true,
-          context: "query",
-        }
-      ).select("firstName lastName email phone");
-
-      if (!updatedUser) {
-        return NextResponse.json(
-          { message: "Utilisateur non trouvé" },
-          { status: 404 }
-        );
-      }
-
-      return NextResponse.json(updatedUser);
-    } catch (error) {
-      console.error("Erreur PUT profile", error);
-      return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
-    }
-  });
-}
-Address Management
-GET /api/account/addresses
-
-POST /api/account/addresses
-
-PUT /api/account/addresses/[id]
-
-DELETE /api/account/addresses/[id]
-
-import Address from "@/models/Address";
-import dbConnect from "@/lib/mongoose";
-import { withAuth } from "@/utils/withAuth";
-import { NextResponse } from "next/server";
-import { z } from "zod";
-
-const addressSchema = z.object({
-  street: z.string().min(1),
-  city: z.string().min(1),
-  state: z.string().min(1),
-  postalCode: z.string().min(1),
-  country: z.string().min(1),
-  isDefault: z.boolean().optional(),
-});
-
-export async function GET(req: Request) {
-  return withAuth(req, async (_req, user) => {
-    await dbConnect();
-
-    try {
-      const addresses = await Address.find({ user: user.userId }).lean();
-      return NextResponse.json(addresses);
-    } catch (error) {
-      console.error("Erreur GET addresses", error);
-      return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
-    }
-  });
-}
-
-export async function POST(req: Request) {
-  return withAuth(req, async (req, user) => {
-    await dbConnect();
-
-    try {
-      const data = await req.json();
-
-      const parseResult = addressSchema.safeParse(data);
-      if (!parseResult.success) {
-        return NextResponse.json(
-          { message: "Données invalides", errors: parseResult.error.errors },
-          { status: 400 }
-        );
-      }
-
-      // Si isDefault true, retirer l'option par défaut des autres adresses
-      if (parseResult.data.isDefault) {
-        await Address.updateMany(
-          { user: user.userId, isDefault: true },
-          { isDefault: false }
-        );
-      }
-
-      const newAddress = new Address({
-        ...parseResult.data,
-        user: user.userId,
-      });
-
-      await newAddress.save();
-
-      return NextResponse.json(newAddress, { status: 201 });
-    } catch (error) {
-      console.error("Erreur POST address", error);
-      return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
-    }
-  });
-}
-import Address from "@/models/Address";
-import dbConnect from "@/lib/mongoose";
-import { withAuth } from "@/utils/withAuth";
-import { NextResponse } from "next/server";
-import { z } from "zod";
-
-const addressUpdateSchema = z.object({
-  street: z.string().min(1).optional(),
-  city: z.string().min(1).optional(),
-  state: z.string().min(1).optional(),
-  postalCode: z.string().min(1).optional(),
-  country: z.string().min(1).optional(),
-  isDefault: z.boolean().optional(),
-});
-
-export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
-  return withAuth(req, async (req, user) => {
-    await dbConnect();
-
-    try {
-      const data = await req.json();
-
-      const parseResult = addressUpdateSchema.safeParse(data);
-      if (!parseResult.success) {
-        return NextResponse.json(
-          { message: "Données invalides", errors: parseResult.error.errors },
-          { status: 400 }
-        );
-      }
-
-      if (parseResult.data.isDefault) {
-        // Retirer l'adresse par défaut précédente
-        await Address.updateMany(
-          { user: user.userId, isDefault: true },
-          { isDefault: false }
-        );
-      }
-
-      const updatedAddress = await Address.findOneAndUpdate(
-        { userId: params.id, user: user.userId },
-        parseResult.data,
-        { new: true, runValidators: true }
-      );
-
-      if (!updatedAddress) {
-        return NextResponse.json(
-          { message: "Adresse non trouvée" },
-          { status: 404 }
-        );
-      }
-
-      return NextResponse.json(updatedAddress);
-    } catch (error) {
-      console.error("Erreur PUT address", error);
-      return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
-    }
-  });
-}
-
-export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
-  return withAuth(req, async (_req, user) => {
-    await dbConnect();
-
-    try {
-      const deletedAddress = await Address.findOneAndDelete({
-        userId: params.id,
-        user: user.userId,
-      });
-
-      if (!deletedAddress) {
-        return NextResponse.json(
-          { message: "Adresse non trouvée" },
-          { status: 404 }
-        );
-      }
-
-      return NextResponse.json({ message: "Adresse supprimée" });
-    } catch (error) {
-      console.error("Erreur DELETE address", error);
-      return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
-    }
-  });
-}
-Orders History
-GET /api/account/orders
-import Order from "@/models/Order";
-import dbConnect from "@/lib/mongoose";
-import { withAuth } from "@/utils/withAuth";
-import { NextResponse } from "next/server";
-
-export async function GET(req: Request) {
-  return withAuth(req, async (_req, user) => {
-    await dbConnect();
-
-    try {
-      // Pagination & filtres via query params
-      const url = new URL(req.url);
-      const page = parseInt(url.searchParams.get("page") || "1");
-      const limit = parseInt(url.searchParams.get("limit") || "10");
-      const statusFilter = url.searchParams.get("status");
-      const dateFrom = url.searchParams.get("dateFrom");
-      const dateTo = url.searchParams.get("dateTo");
-
-      const filter: any = { userId: user.userId};
-
-      if (statusFilter) filter.status = statusFilter;
-      if (dateFrom || dateTo) filter.createdAt = {};
-      if (dateFrom) filter.createdAt.$gte = new Date(dateFrom);
-      if (dateTo) filter.createdAt.$lte = new Date(dateTo);
-
-      const orders = await Order.find(filter)
-        .sort({ createdAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(limit)
-        .populate("items.product")
-        .lean();
-
-      const totalCount = await Order.countDocuments(filter);
-
-      return NextResponse.json({ orders, totalCount, page, limit });
-    } catch (error) {
-      console.error("Erreur GET orders", error);
-      return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
-    }
-  });
-}
-Payment Methods (Stripe)
-GET /api/account/payment-methods
-
-POST /api/account/payment-methods
-
-DELETE /api/account/payment-methods/[id]
-
-PUT /api/account/payment-methods/[id]
-import { withAuth } from "@/utils/withAuth";
-import { NextResponse } from "next/server";
-import Stripe from "stripe";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2023-10-16",
-});
-
-export async function GET(req: Request) {
-  return withAuth(req, async (_req, user) => {
-    try {
-      const paymentMethods = await stripe.paymentMethods.list({
-        customer: user.stripeCustomerId, // suppose que ce champ existe
-        type: "card",
-      });
-
-      return NextResponse.json(paymentMethods.data);
-    } catch (error) {
-      console.error("Erreur GET payment methods", error);
-      return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
-    }
-  });
-}
-
-export async function POST(req: Request) {
-  return withAuth(req, async (req, user) => {
-    try {
-      const { paymentMethodId } = await req.json();
-
-      if (!paymentMethodId) {
-        return NextResponse.json(
-          { message: "paymentMethodId est requis" },
-          { status: 400 }
-        );
-      }
-
-      // Attacher la carte au client Stripe
-      await stripe.paymentMethods.attach(paymentMethodId, {
-        customer: user.stripeCustomerId,
-      });
-
-      // Mettre à jour la méthode par défaut dans Stripe
-      await stripe.customers.update(user.stripeCustomerId, {
-        invoice_settings: { default_payment_method: paymentMethodId },
-      });
-
-      return NextResponse.json({ message: "Carte ajoutée" });
-    } catch (error) {
-      console.error("Erreur POST payment method", error);
-      return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
-    }
-  });
-}
-import { withAuth } from "@/utils/withAuth";
-import { NextResponse } from "next/server";
-import Stripe from "stripe";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2023-10-16",
-});
-
-export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
-  return withAuth(req, async (_req, user) => {
-    try {
-      // Détacher la carte Stripe
-      await stripe.paymentMethods.detach(params.id);
-
-      return NextResponse.json({ message: "Carte supprimée" });
-    } catch (error) {
-      console.error("Erreur DELETE payment method", error);
-      return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
-    }
-  });
-}
-
-export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
-  return withAuth(req, async (_req, user) => {
-    try {
-      // Mettre à jour la carte par défaut dans Stripe
-      await stripe.customers.update(user.stripeCustomerId, {
-        invoice_settings: { default_payment_method: params.id },
-      });
-
-      return NextResponse.json({ message: "Carte définie par défaut" });
-    } catch (error) {
-      console.error("Erreur PUT payment method default", error);
-      return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
-    }
-  });
-}
-Preferences
-GET /api/account/preferences
-
-PUT /api/account/preferences
-import UserPreferences from "@/models/UserPreferences";
-import dbConnect from "@/lib/mongoose";
-import { withAuth } from "@/utils/withAuth";
-import { NextResponse } from "next/server";
-import { z } from "zod";
-
-const preferencesSchema = z.object({
-  newsletter: z.boolean().optional(),
-  language: z.string().min(2).max(10).optional(),
-  notifications: z.boolean().optional(),
-});
-
-export async function GET(req: Request) {
-  return withAuth(req, async (_req, user) => {
-    await dbConnect();
-
-    try {
-      const prefs = await UserPreferences.findOne({ userId: user.userId }).lean();
-
-      if (!prefs) {
-        return NextResponse.json({}, { status: 204 }); // Pas de contenu
-      }
-
-      return NextResponse.json(prefs);
-    } catch (error) {
-      console.error("Erreur GET preferences", error);
-      return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
-    }
-  });
-}
-
-export async function PUT(req: Request) {
-  return withAuth(req, async (req, user) => {
-    await dbConnect();
-
-    try {
-      const data = await req.json();
-      const parseResult = preferencesSchema.safeParse(data);
-
-      if (!parseResult.success) {
-        return NextResponse.json(
-          { message: "Données invalides", errors: parseResult.error.errors },
-          { status: 400 }
-        );
-      }
-
-      const updatedPrefs = await UserPreferences.findOneAndUpdate(
-        { userId: user.userId },
-        parseResult.data,
-        { new: true, upsert: true, runValidators: true }
-      );
-
-      return NextResponse.json(updatedPrefs);
-    } catch (error) {
-      console.error("Erreur PUT preferences", error);
-      return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
-    }
-  });
-}
-Security
-PUT /api/account/security
-
-DELETE /api/account/delete
-import User from "@/models/User";
-import dbConnect from "@/lib/mongoose";
-import { withAuth } from "@/utils/withAuth";
-import { NextResponse } from "next/server";
-import { z } from "zod";
-import bcrypt from "bcryptjs";
-
-const passwordChangeSchema = z.object({
-  oldPassword: z.string().min(6),
-  newPassword: z.string().min(6),
-});
-
-export async function PUT(req: Request) {
-  return withAuth(req, async (req, user) => {
-    await dbConnect();
-
-    try {
-      const data = await req.json();
-
-      const parseResult = passwordChangeSchema.safeParse(data);
-      if (!parseResult.success) {
-        return NextResponse.json(
-          { message: "Données invalides", errors: parseResult.error.errors },
-          { status: 400 }
-        );
-      }
-
-      const currentUser = await User.findById(user.userId).select("password");
-
-      if (!currentUser) {
-        return NextResponse.json(
-          { message: "Utilisateur non trouvé" },
-          { status: 404 }
-        );
-      }
-
-      const isMatch = await bcrypt.compare(
-        parseResult.data.oldPassword,
-        currentUser.password
-      );
-
-      if (!isMatch) {
-        return NextResponse.json(
-          { message: "Ancien mot de passe incorrect" },
-          { status: 400 }
-        );
-      }
-
-      const hashed = await bcrypt.hash(parseResult.data.newPassword, 10);
-      currentUser.password = hashed;
-      await currentUser.save();
-
-      return NextResponse.json({ message: "Mot de passe modifié" });
-    } catch (error) {
-      console.error("Erreur PUT security", error);
-      return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
-    }
-  });
-}
+# 🏆 Prompt Universel - Expert UI/UX Boutique Luxe
+
+Tu es un **expert UI/UX spécialisé dans les interfaces haut de gamme** pour les boutiques en ligne de luxe. Ton rôle est d'optimiser uniquement l'interface utilisateur et l'expérience utilisateur d'une application Next.js, dans un style **élégant, raffiné et luxueux**.
+
+## 🎨 Palette de Couleurs Obligatoire (STRICTEMENT respectée)
+
+| Classe Tailwind | Couleur / Rôle | Utilisation |
+|---|---|---|
+| `bg-black` | Dégradé noir | Fond principal |
+| `bg-gradient-to-br from-zinc-900 via-black to-zinc-900` | Dégradé sombre biseauté | Fond de cartes |
+| `bg-[radial-gradient(#ffffff11_1px,transparent_1px)]` | Pointillé blanc subtil | Overlay décoratif |
+| `bg-gradient-to-t from-amber-400/5 to-transparent` | Dégradé doré léger | Lueurs d'ambiance |
+| `border-amber-400/20`, `border-amber-400/30` | Or pâle, semi-transparent | Bordures élégantes |
+| `bg-black/80`, `bg-black/60` | Noir semi-transparent | Zones info/overlay |
+| `bg-gradient-to-t from-black/60 to-transparent` | Dégradé noir → transparent | Overlays image |
+| `text-xs text-amber-300/90` | Texte doré clair | Chiffres / stats |
+| `bg-zinc-800/80` | Gris foncé | Fond de barres |
+| `bg-gradient-to-r from-amber-400/60 to-amber-300/80` | Dégradé doré horizontal | Barres actives |
+| `text-zinc-400`, `text-zinc-400/90` | Texte gris clair | Infos secondaires |
+| `text-zinc-300/90` | Gris très clair | Descriptions principales |
+| `border-zinc-800/50`, `border-zinc-800/90` | Gris très foncé | Séparateurs visuels |
+| `text-white` | Blanc pur | Titres et infos importantes |
+| `text-sm tracking-[0.3em] text-zinc-400/90` | Texte espacé gris | Catégories |
+| `bg-gradient-to-r from-amber-200 via-amber-100 to-amber-200 text-transparent bg-clip-text` | Dégradé doré clair | Titres stylisés |
+| `bg-amber-500 hover:bg-amber-600` | Bouton CTA | Bouton principal |
+| `text-black` | Texte noir | Sur bouton doré |
+
+## 🛠 Stack Technique Imposé
+
+### UI Primitives & Composants
+- **Radix UI** (@radix-ui/react-*) pour l'accessibilité
+- **Lucide React** pour les icônes
+- **Framer Motion** pour les animations avancées
+- **tailwindcss-animate** pour les animations CSS
+
+### Fonctionnalités
+- **React Hook Form** pour les formulaires
+- **clsx** + **tailwind-merge** pour la gestion des classes
+- **react-hot-toast** ou **sonner** pour les notifications
+- **chart.js** + **react-chartjs-2** pour les graphiques
+
+### Framework
+- **Next.js 14+**, **React 18+**, **Tailwind CSS 4+**
+
+## ✅ Missions Précises
+
+### 🎯 Objectifs de Refonte
+1. **Styliser** la sidebar, header, menu mobile et contenu principal
+2. **Respecter scrupuleusement** la palette de couleurs luxe
+3. **Ajouter** des animations et transitions fluides (menu, hover, clic, focus)
+4. **Garantir** une expérience fluide, haut de gamme, responsive et intuitive
+5. **Créer** des micro-interactions élégantes (lueurs dorées, dégradés subtils, textures overlay)
+6. **Veiller** à l'accessibilité et lisibilité optimale
+7. **Appliquer** les principes UX avancés pour un design cohérent
+
+### 🎨 Directives Esthétiques
+- **Animations fluides** : Utilise Framer Motion pour les transitions complexes
+- **Micro-interactions** : Hover effects avec lueurs dorées subtiles
+- **Textures** : Overlays en pointillés et dégradés pour la profondeur
+- **Espacement** : Lettres espacées pour les catégories (`tracking-[0.3em]`)
+- **Accessibilité** : Contraste optimal, focus visible, navigation clavier
+
+### 🔧 Optimisations Techniques
+- **Performance** : Lazy loading, animations optimisées
+- **Responsive** : Mobile-first, breakpoints fluides
+- **Accessibilité** : ARIA labels, semantic HTML, keyboard navigation
+- **UX** : Feedback immédiat, états de chargement, erreurs élégantes
+
+## 📝 Format de Réponse Attendu
+
+1. **Analyse** du composant existant (points d'amélioration)
+2. **Code refactorisé** avec les améliorations UI/UX
+3. **Explications** des choix de design et d'interaction
+4. **Recommandations** d'optimisation supplémentaires
+
+---
+
+**Instructions d'utilisation :**
+- Colle ce prompt
+- Ajoute ton composant à refondre après
+- Précise les fonctionnalités spécifiques si nécessaire
+
+**Exemple :**
+```
+[COLLER CE PROMPT]
+
+Voici le composant à refondre :
+[TON_COMPOSANT_ICI]
+
+Objectif spécifique : Améliorer la navigation mobile et ajouter des animations de transition

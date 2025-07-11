@@ -1,40 +1,39 @@
-// AboutPage.tsx - Composant unifié
+// AboutPage.tsx
 "use client";
 
-import { motion } from "framer-motion";
-import Image from "next/image";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { AboutHero } from "@/components/sections/about/AboutHero";
 import { Philosophy } from "@/components/sections/about/Philosophy";
 import { Commitments } from "@/components/sections/about/Commitments";
 import { Testimonials } from "@/components/sections/about/Testimonials";
 import { ContactCTA } from "@/components/sections/about/ContactCTA";
 
+// Import des icônes Lucide React
+import { Leaf, Hammer, Diamond, FlaskRound } from "lucide-react";
+
 const commitments = [
   {
     title: "Éthique & Responsabilité",
     description:
       "Nous sélectionnons exclusivement des matériaux issus de sources éthiques et traçables, dans le respect des normes internationales les plus strictes.",
-    icon: "🌿",
+    icon: <Leaf className="text-amber-400 w-10 h-10" />,
   },
   {
     title: "Artisanat d'Excellence",
     description:
       "Chaque pièce est façonnée par nos maîtres artisans, perpétuant un savoir-faire joaillier d'exception transmis de génération en génération.",
-    icon: "⚒️",
+    icon: <Hammer className="text-amber-400 w-10 h-10" />,
   },
   {
     title: "Qualité Premium",
     description:
       "Nos créations sont soumises à des contrôles rigoureux pour garantir une qualité irréprochable et une durabilité exceptionnelle.",
-    icon: "💎",
+    icon: <Diamond className="text-amber-400 w-10 h-10" />,
   },
   {
     title: "Innovation & Tradition",
     description:
       "Nous allions techniques traditionnelles et innovations modernes pour créer des pièces uniques qui redéfinissent l'élégance masculine.",
-    icon: "🔬",
+    icon: <FlaskRound className="text-amber-400 w-10 h-10" />,
   },
 ];
 
@@ -64,19 +63,11 @@ const testimonials = [
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen  relative overflow-hidden space-y-2">
-      {/* Effets de fond globaux */}
-    
-      <AboutHero/>
-
-      {/* PHILOSOPHY SECTION */}
+    <div className="min-h-screen relative overflow-hidden space-y-2">
+      <AboutHero />
       <Philosophy />
-
-      {/* COMMITMENTS SECTION */}
       <Commitments commitments={commitments} />
-      {/* TESTIMONIALS SECTION */}
       <Testimonials testimonials={testimonials} />
-      {/* CONTACT CTA SECTION */}
       <ContactCTA />
     </div>
   );

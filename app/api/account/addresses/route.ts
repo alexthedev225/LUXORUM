@@ -3,6 +3,7 @@ import dbConnect from "@/lib/mongoose";
 import { withAuth } from "@/utils/withAuth";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { ObjectId } from "mongoose"; // ou "mongoose" selon ta config
 
 const addressSchema = z.object({
   street: z.string().min(1),
@@ -18,6 +19,7 @@ export async function GET(req: Request) {
     await dbConnect();
 
     try {
+      
       const addresses = await Address.find({ user: user.userId }).lean();
       return NextResponse.json(addresses);
     } catch (error) {

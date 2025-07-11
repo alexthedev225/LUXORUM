@@ -39,25 +39,99 @@ export async function POST(req: Request) {
     }
 
     switch (event.type) {
+      case "payment_intent.succeeded": {
+        console.log("▶️ Traitement de payment_intent.succeeded");
+        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+
+        const userId = paymentIntent.metadata?.userId;
+        if (!userId) {
+          console.warn(
+            "⚠️ User ID manquant dans metadata du PaymentIntent. Événement ignoré."
+          );
+          return NextResponse.json({ received: true });
+        }
+
+        let order = await Order.findOne({ paymentIntentId: paymentIntent.id });
+
+        if (!order) {
+          const cart = await Cart.findOne({ userId }).populate("items.product");
+          if (!cart || cart.items.length === 0) {
+            console.warn(
+              `⚠️ Panier introuvable ou vide pour userId: ${userId}. Événement ignoré.`
+            );
+            return NextResponse.json({ received: true });
+          }
+
+          const orderItems = cart.items.map((item: { product: unknown; quantity: any; }) => {
+            const product = item.product as unknown as IProduct;
+            return {
+              product: product._id,
+              name: product.name,
+              price: product.price,
+              quantity: item.quantity,
+            };
+          });
+
+          const amount = paymentIntent.amount_received
+            ? paymentIntent.amount_received / 100
+            : orderItems.reduce(
+                (acc: number, item: { price: number; quantity: number; }) => acc + item.price * item.quantity,
+                0
+              );
+
+          order = new Order({
+            userId,
+            items: orderItems,
+            amount,
+            status: "paid",
+            paymentIntentId: paymentIntent.id,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          });
+
+          await order.save();
+          console.log(`✅ Commande sauvegardée en base avec id: ${order._id}`);
+
+          await User.findByIdAndUpdate(userId, {
+            $push: { orders: order._id },
+          });
+          console.log(`👤 Commande ajoutée à l'utilisateur ${userId}`);
+
+          cart.items = [];
+          await cart.save();
+          console.log(`🗑️ Panier vidé pour l'utilisateur ${userId}`);
+        } else {
+          console.log(
+            `ℹ️ Commande déjà enregistrée pour PaymentIntent ${paymentIntent.id}`
+          );
+        }
+        break;
+      }
+
       case "checkout.session.completed": {
-        const session = event.data.object as Stripe.Checkout.Session;
         console.log("▶️ Traitement de checkout.session.completed");
+        const session = event.data.object as Stripe.Checkout.Session;
 
         const userId = session.client_reference_id;
-        console.log("➡️ userId extrait du session :", userId);
         if (!userId) {
-          console.error("❌ User ID manquant dans session Stripe");
-          throw new Error("User ID manquant dans session Stripe");
+          console.warn(
+            "⚠️ User ID manquant dans session Stripe. Événement ignoré."
+          );
+          return NextResponse.json({ received: true });
         }
 
         const cart = await Cart.findOne({ userId }).populate("items.product");
         if (!cart) {
-          console.error(`❌ Panier introuvable pour userId: ${userId}`);
-          throw new Error("Panier non trouvé");
+          console.warn(
+            `⚠️ Panier introuvable pour userId: ${userId}. Événement ignoré.`
+          );
+          return NextResponse.json({ received: true });
         }
         if (cart.items.length === 0) {
-          console.error(`❌ Panier vide pour userId: ${userId}`);
-          throw new Error("Panier vide");
+          console.warn(
+            `⚠️ Panier vide pour userId: ${userId}. Événement ignoré.`
+          );
+          return NextResponse.json({ received: true });
         }
 
         console.log(`📦 Panier récupéré avec ${cart.items.length} items.`);
@@ -86,6 +160,7 @@ export async function POST(req: Request) {
           items: orderItems,
           amount,
           status: "paid",
+          paymentIntentId: session.payment_intent,
           createdAt: new Date(),
           updatedAt: new Date(),
         });
@@ -101,9 +176,6 @@ export async function POST(req: Request) {
         cart.items = [];
         await cart.save();
         console.log(`🗑️ Panier vidé pour l'utilisateur ${userId}`);
-
-        // Optionnel : envoyer une notification
-        // await sendOrderStatusUpdate(session);
 
         break;
       }
@@ -124,12 +196,12 @@ export async function POST(req: Request) {
             `⚠️ Aucune commande trouvée pour paymentIntent ${paymentIntent.id}`
           );
         }
-
         break;
       }
 
       default:
         console.log(`ℹ️ Événement Stripe non géré : ${event.type}`);
+        break;
     }
 
     return NextResponse.json({ received: true });

@@ -5,24 +5,21 @@ import { useRouter, usePathname } from "next/navigation";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { Navbar } from "./Navbar";
 import { Footer } from "./Footer";
-import { CartProvider } from "@/context/CartContext";
+import { Toaster } from "react-hot-toast";
 
-interface Settings {
-  siteName: string;
-  siteDescription: string;
-  maintenanceMode: boolean;
-  theme: "dark" | "light";
-  language: string;
-}
-
-export default function LayoutClient({
-  children,
-  initialSettings,
-}: {
+interface LayoutClientProps {
+  initialSettings: any; 
+  isAdmin: boolean;
   children: React.ReactNode;
-  initialSettings: Settings;
-}) {
-  const pathname = usePathname();
+  isAuthenticated: boolean;
+}
+export default function LayoutClient({
+  initialSettings,
+  isAdmin,
+  children,
+  isAuthenticated,
+}: LayoutClientProps) {
+  const pathname = usePathname() || "";
   const router = useRouter();
   const { setSettings, maintenanceMode, theme } = useSettingsStore();
 
@@ -39,27 +36,30 @@ export default function LayoutClient({
   }, [maintenanceMode, pathname, router]);
 
   const isAuthPage =
-    pathname.startsWith("/auth") || pathname.startsWith("/admin");
+    pathname.startsWith("/auth") ||
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/mon-compte");
 
   return (
-    <div
-      className={`font-serif antialiased relative min-h-screen ${
-        theme === "dark"
-          ? "bg-black text-white"
-          : "bg-gradient-to-b from-amber-200/90 via-amber-100/90 to-amber-200/90 text-black"
-      }`}
-    >
-    
-
-      <Navbar />
-      <main
-        className={`min-h-screen relative ${
-          isAuthPage ? "px-0 pt-0" : "px-2 pt-10"
+    <>
+      <div
+        className={` antialiased relative min-h-screen ${
+          theme === "dark"
+            ? "bg-black text-white"
+            : "bg-gradient-to-b from-amber-200/90 via-amber-100/90 to-amber-200/90 text-black"
         }`}
       >
-        <CartProvider>{children}</CartProvider>
-      </main>
-      <Footer />
-    </div>
+        <Navbar isAdmin={isAdmin} isAuthenticated={isAuthenticated} />
+        <main
+          className={`min-h-screen relative ${
+            isAuthPage ? "px-0 pt-0" : "px-2 pt-28"
+          }`}
+        >
+          {children}
+        </main>
+        <Footer />
+      </div>
+      <Toaster position="top-center" />
+    </>
   );
 }

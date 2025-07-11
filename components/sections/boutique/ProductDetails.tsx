@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   ShoppingCart,
   Star,
@@ -32,7 +32,7 @@ export function ProductDetails({ product }: Props) {
   const [quantity, setQuantity] = useState(1);
   const [showStockAlert, setShowStockAlert] = useState(false);
 
-  // Animation de particules dorées
+  // Particules dorées
   const [particles, setParticles] = useState<
     Array<{ id: number; x: number; y: number }>
   >([]);
@@ -48,7 +48,7 @@ export function ProductDetails({ product }: Props) {
 
     setIsAddingToCart(true);
 
-    // Animation de particules
+    // Particules animées
     const newParticles = Array.from({ length: 12 }, (_, i) => ({
       id: Date.now() + i,
       x: Math.random() * 100,
@@ -57,11 +57,8 @@ export function ProductDetails({ product }: Props) {
     setParticles(newParticles);
 
     try {
-      // 1. Mise à jour locale Zustand
       await addToCart(product, quantity);
 
-      // 2. Mise à jour côté serveur (en parallèle)
-      // Tu peux lancer la requête sans attendre, ou attendre pour gérer erreurs
       fetch("/api/cart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -69,22 +66,17 @@ export function ProductDetails({ product }: Props) {
           productId: product._id,
           quantity,
         }),
-        credentials: "include", // si besoin de cookies/session
+        credentials: "include",
       })
         .then(async (res) => {
           if (!res.ok) {
-            // Gérer erreur serveur (rollback local ?)
             console.error("Erreur serveur lors de l'ajout au panier");
-          } else {
-            const data = await res.json();
-            // Optionnel: mettre à jour le store Zustand avec data du serveur si besoin
           }
         })
         .catch((err) => {
           console.error("Erreur réseau lors de l'ajout au panier", err);
         });
 
-      // Confirmation UI
       setShowConfirmation(true);
       setTimeout(() => setShowConfirmation(false), 4000);
     } catch (error) {
@@ -95,6 +87,19 @@ export function ProductDetails({ product }: Props) {
     }
   };
 
+  // Parse description détaillée pour texte gras entouré de **
+  const renderDetailedDescription = (text: string) => {
+    const parts = text.split("**");
+    return parts.map((part, index) =>
+      index % 2 === 1 ? (
+        <strong key={index} className="font-semibold text-amber-300/90">
+          {part}
+        </strong>
+      ) : (
+        <span key={index}>{part}</span>
+      )
+    );
+  };
 
   const discountedPrice = product.discount
     ? product.price * (1 - product.discount / 100)
@@ -126,7 +131,7 @@ export function ProductDetails({ product }: Props) {
         ))}
       </AnimatePresence>
 
-      {/* Notification de confirmation */}
+      {/* Confirmation ajout panier */}
       <AnimatePresence>
         {showConfirmation && (
           <motion.div
@@ -175,126 +180,46 @@ export function ProductDetails({ product }: Props) {
           transition={{ duration: 1 }}
         >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 xl:gap-24">
-            {/* Galerie Produit avec navigation */}
+            {/* Colonne gauche: Galerie + description détaillée */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-              className="relative group perspective-2000"
+              className="relative group perspective-2000 flex  flex-col "
             >
-              {/* Badge discount */}
-              {product.discount && (
+              {/* Carte image centrée */}
+              <div className=" rounded-2xl bg-black/80 border-2 border-amber-200/20 p-4 shadow-lg w-max">
+                <Image
+                  src={product.images[0]}
+                  alt={product.name}
+                  width={400}
+                  height={400}
+                  className="object-contain rounded-2xl bg-transparent"
+                />
+              </div>
+
+              {/* Description détaillée sous l'image */}
+              {product.specifications.detailedDescription && (
                 <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.5, type: "spring" }}
-                  className="absolute -top-4 -right-4 z-20 bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg"
+                  className="mt-10  text-zinc-300 font-light leading-relaxed max-w-xl mx-auto"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.7 }}
                 >
-                  -{product.discount}%
+                  <h2 className="text-white text-2xl mb-4 font-cinzel-decorative flex items-center gap-2 ">
+                    <Sparkles className="w-6 h-6 text-amber-400" />
+                    Description détaillée
+                  </h2>
+                  <p>
+                    {renderDetailedDescription(
+                      product.specifications.detailedDescription
+                    )}
+                  </p>
                 </motion.div>
               )}
-
-              <div className="relative w-full aspect-[2.5/3.5] preserve-3d group-hover:rotate-y-6 transition-transform duration-700">
-                <div className="absolute inset-0 rounded-2xl overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 via-black to-zinc-900">
-                    <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#ffffff11_1px,transparent_1px)] [background-size:16px_16px]" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-amber-400/5 to-transparent" />
-                  </div>
-
-                  <div className="absolute inset-[12px] rounded-xl border-2 border-amber-400/20 overflow-hidden">
-                    <div className="relative h-[60%] rounded-t-lg overflow-hidden">
-                      <AnimatePresence mode="wait">
-                        <motion.div
-                          key={selectedImageIndex}
-                          initial={{ opacity: 0, scale: 1.1 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.9 }}
-                          transition={{ duration: 0.5 }}
-                          className="absolute inset-0"
-                        >
-                          <Image
-                            src={
-                              product.images[selectedImageIndex] ||
-                              product.images[0]
-                            }
-                            alt={product.name}
-                            fill
-                            className="object-cover transform-gpu transition-transform duration-700 group-hover:scale-110"
-                          />
-                        </motion.div>
-                      </AnimatePresence>
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-
-                      {/* Actions rapides */}
-                      <div className="absolute top-4 right-4 flex flex-col gap-2">
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={() => setIsWishlisted(!isWishlisted)}
-                          className={`p-2 rounded-full backdrop-blur-sm transition-colors ${
-                            isWishlisted
-                              ? "bg-red-500/80 text-white"
-                              : "bg-white/10 text-white hover:bg-white/20"
-                          }`}
-                        >
-                          <Heart
-                            className={`w-5 h-5 ${
-                              isWishlisted ? "fill-current" : ""
-                            }`}
-                          />
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          className="p-2 rounded-full bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm transition-colors"
-                        >
-                          <Share2 className="w-5 h-5" />
-                        </motion.button>
-                      </div>
-                    </div>
-
-                    <div className="absolute bottom-0 inset-x-0 h-[40%] p-6 bg-black/80">
-                      <motion.h2
-                        className="text-xl font-cinzel-decorative mb-4 text-center"
-                        initial={{ y: 20, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ delay: 0.8 }}
-                      >
-                        <span className="bg-gradient-to-r from-amber-200 via-amber-300 to-amber-200 bg-clip-text text-transparent">
-                          {product.name}
-                        </span>
-                      </motion.h2>
-                      <p className="text-center text-sm text-zinc-400 mb-4">
-                        Produit de luxe exclusif
-                      </p>
-
-                      {/* Navigation images */}
-                      {product.images.length > 1 && (
-                        <div className="flex justify-center gap-2">
-                          {product.images.map((_, index) => (
-                            <motion.button
-                              key={index}
-                              whileHover={{ scale: 1.2 }}
-                              whileTap={{ scale: 0.9 }}
-                              onClick={() => setSelectedImageIndex(index)}
-                              className={`w-2 h-2 rounded-full transition-colors ${
-                                index === selectedImageIndex
-                                  ? "bg-amber-400"
-                                  : "bg-zinc-600 hover:bg-zinc-500"
-                              }`}
-                            />
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="absolute inset-0 bg-gradient-to-tr from-amber-400/0 via-amber-400/5 to-amber-400/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-              </div>
             </motion.div>
 
-            {/* Infos produit enrichies */}
+            {/* Colonne droite: infos produit */}
             <motion.div
               initial={{ opacity: 0, x: 40 }}
               animate={{ opacity: 1, x: 0 }}
@@ -373,7 +298,7 @@ export function ProductDetails({ product }: Props) {
                 </motion.div>
               </div>
 
-              {/* Description avec animations */}
+              {/* Description courte */}
               <motion.div
                 className="space-y-6"
                 initial={{ opacity: 0, y: 20 }}
@@ -470,7 +395,7 @@ export function ProductDetails({ product }: Props) {
                 )}
               </motion.div>
 
-              {/* Section ajout au panier avec sélecteur quantité */}
+              {/* Ajout au panier */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -484,110 +409,51 @@ export function ProductDetails({ product }: Props) {
                       <motion.button
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
-                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                        className="px-3 py-2 text-white hover:bg-zinc-800 transition-colors"
+                        onClick={() => setQuantity((q) => (q > 1 ? q - 1 : q))}
+                        className="px-4 py-2 font-bold text-zinc-400 hover:text-amber-400"
                       >
                         -
                       </motion.button>
-                      <span className="px-4 py-2 text-white bg-zinc-800">
-                        {quantity}
-                      </span>
+                      <input
+                        type="number"
+                        className="w-12 text-center bg-transparent border-none focus:ring-0 text-white font-semibold"
+                        min={1}
+                        max={product.stock}
+                        value={quantity}
+                        onChange={(e) =>
+                          setQuantity(
+                            Math.min(
+                              product.stock,
+                              Math.max(1, Number(e.target.value))
+                            )
+                          )
+                        }
+                      />
                       <motion.button
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={() =>
-                          setQuantity(Math.min(product.stock, quantity + 1))
+                          setQuantity((q) => (q < product.stock ? q + 1 : q))
                         }
-                        className="px-3 py-2 text-white hover:bg-zinc-800 transition-colors"
+                        className="px-4 py-2 font-bold text-zinc-400 hover:text-amber-400"
                       >
                         +
                       </motion.button>
                     </div>
                   </div>
                 )}
-
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                <Button
+                  className="w-full rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition-all duration-200"
+                  onClick={handleAddToCart}
+                  disabled={isAddingToCart || product.stock === 0}
                 >
-                  <Button
-                    className={`w-full h-14 text-lg font-semibold rounded-xl transition-all duration-300 relative overflow-hidden ${
-                      product.stock === 0
-                        ? "bg-zinc-700 text-zinc-400 cursor-not-allowed"
-                        : isAddingToCart
-                        ? "bg-amber-600 text-black"
-                        : "bg-amber-500 hover:bg-amber-600 text-black hover:shadow-2xl hover:shadow-amber-500/20"
-                    }`}
-                    onClick={handleAddToCart}
-                    disabled={isAddingToCart || product.stock === 0}
-                  >
-                    <AnimatePresence mode="wait">
-                      {isAddingToCart ? (
-                        <motion.div
-                          key="loading"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="flex items-center gap-3"
-                        >
-                          <motion.div
-                            animate={{ rotate: 360 }}
-                            transition={{
-                              duration: 1,
-                              repeat: Infinity,
-                              ease: "linear",
-                            }}
-                          >
-                            <Sparkles className="w-6 h-6" />
-                          </motion.div>
-                          Ajout en cours...
-                        </motion.div>
-                      ) : product.stock === 0 ? (
-                        <motion.div
-                          key="out-of-stock"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="flex items-center gap-2"
-                        >
-                          <X className="w-5 h-5" />
-                          Temporairement indisponible
-                        </motion.div>
-                      ) : (
-                        <motion.div
-                          key="add-to-cart"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="flex items-center gap-3"
-                        >
-                          <ShoppingCart className="w-6 h-6" />
-                          Ajouter au panier •{" "}
-                          {(discountedPrice * quantity).toLocaleString(
-                            "fr-FR"
-                          )}{" "}
-                          €
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-
-                    {/* Effet de lueur au survol */}
-                    {!isAddingToCart && product.stock > 0 && (
-                      <motion.div
-                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full"
-                        animate={{ x: ["100%", "-100%"] }}
-                        transition={{
-                          duration: 2,
-                          repeat: Infinity,
-                          repeatDelay: 3,
-                          ease: "linear",
-                        }}
-                      />
-                    )}
-                  </Button>
-                </motion.div>
-
-                
+                  {product.stock === 0
+                    ? "Rupture de stock"
+                    : isAddingToCart
+                    ? "Ajout en cours..."
+                    : "Ajouter au panier"}
+                  <ShoppingCart className="ml-3 w-5 h-5" />
+                </Button>
               </motion.div>
             </motion.div>
           </div>

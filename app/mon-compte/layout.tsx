@@ -1,40 +1,122 @@
-// /app/mon-compte/layout.tsx
-import React from "react";
+// app/mon-compte/layout.tsx
 
-export const metadata = {
-  title: "Mon compte - Luxorum",
-  description: "Page Mon compte de Luxorum",
-};
+import MonCompteLayoutClient from "./components/MonCompteLayoutClient";
+import { cookies } from "next/headers";
 
-export default function MonCompteLayout({
+// Types
+interface UserData {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+}
+
+interface Address {
+  _id: string;
+  street: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  isDefault: boolean;
+}
+
+interface Order {
+  _id: string;
+  createdAt: string;
+  amount: number;
+  status: "pending" | "processing" | "shipped" | "delivered";
+  items: Array<{
+    product: any;
+    quantity: number;
+    price: number;
+    name: string;
+  }>;
+}
+
+async function getAuthToken(): Promise<string | null> {
+  const cookieStore = await cookies();
+  return cookieStore.get("token")?.value || null;
+}
+
+async function fetchUserProfile(token: string): Promise<UserData | null> {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/account/profile`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      }
+    );
+    if (!res.ok) throw new Error();
+    return res.json();
+  } catch {
+    return null;
+  }
+}
+
+async function fetchUserAddresses(token: string): Promise<Address[]> {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/account/addresses`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      }
+    );
+    if (!res.ok) throw new Error();
+    return res.json();
+  } catch {
+    return [];
+  }
+}
+
+async function fetchUserOrders(token: string): Promise<Order[]> {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/account/orders?page=1&limit=10`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      }
+    );
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    return data.orders || [];
+  } catch {
+    return [];
+  }
+}
+
+
+export default async function MonCompteLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-black via-zinc-950 to-black mb-2 rounded-2xl pt-16">
-      {/* Background effet grille */}
-      <div
-        className="fixed inset-0 bg-[radial-gradient(#ffffff11_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"
-        aria-hidden="true"
-      />
-      {/* Ici on met le header global */}
-      <header className="sticky top-0 z-40 bg-gradient-to-t from-black/60 to-transparent backdrop-blur-xl border-b border-amber-400/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <h1 className="text-2xl font-light bg-gradient-to-r from-amber-200 via-amber-100 to-amber-200 text-transparent bg-clip-text">
-              Mon compte
-            </h1>
-            {/* Le bouton menu mobile est géré côté client, donc ici on peut laisser vide ou placer un placeholder */}
-            <div aria-hidden="true" />
-          </div>
-        </div>
-      </header>
+  const token = await getAuthToken();
+  if (!token) return null; // middleware de redirection doit s'en charger
 
-      {/* Le contenu dynamique (sidebar + main) sera injecté ici via children */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {children}
-      </main>
-    </div>
+  const [userData, addresses, orders] =
+    await Promise.all([
+      fetchUserProfile(token),
+      fetchUserAddresses(token),
+      fetchUserOrders(token),
+  
+    ]);
+
+  if (!userData) return null;
+
+  return (
+    <MonCompteLayoutClient
+      user={userData}
+      addresses={addresses}
+      orders={orders}
+    
+      
+    >
+      {children}
+    </MonCompteLayoutClient>
   );
 }

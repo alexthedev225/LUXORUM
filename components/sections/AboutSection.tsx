@@ -3,23 +3,11 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Award, Sparkles, Users, Calendar } from "lucide-react";
+import dynamic from "next/dynamic";
 
-// Simulation des composants manquants
-const Image = ({ src, alt, fill, className, sizes, priority, ...props }) => (
-  <img
-    src={src || "/api/placeholder/600/800"}
-    alt={alt}
-    className={className}
-    style={fill ? { width: "100%", height: "100%", objectFit: "cover" } : {}}
-    {...props}
-  />
-);
-
-const Link = ({ href, children, className, ...props }) => (
-  <a href={href} className={className} {...props}>
-    {children}
-  </a>
-);
+// Dynamic imports (client-only)
+const Image = dynamic(() => import("next/image"));
+const Link = dynamic(() => import("next/link"));
 
 export function AboutSection() {
   return (
@@ -46,7 +34,6 @@ export function AboutSection() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2, duration: 0.8 }}
           >
-            {/* Header avec badge */}
             <header className="space-y-6">
               <motion.div
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-br from-zinc-900 via-black to-zinc-900 border border-amber-400/20"
@@ -75,7 +62,6 @@ export function AboutSection() {
               </motion.h2>
             </header>
 
-            {/* Contenu principal */}
             <div className="space-y-8">
               <motion.p
                 className="text-lg text-zinc-300/90 leading-relaxed font-light"
@@ -101,7 +87,6 @@ export function AboutSection() {
               </motion.p>
             </div>
 
-            {/* Statistiques élégantes */}
             <motion.div
               className="grid grid-cols-3 gap-8 py-8 border-y border-zinc-800/50"
               initial={{ opacity: 0, y: 30 }}
@@ -128,7 +113,6 @@ export function AboutSection() {
               </div>
             </motion.div>
 
-            {/* CTA amélioré */}
             <motion.div
               className="pt-4"
               initial={{ opacity: 0, y: 30 }}
@@ -136,34 +120,28 @@ export function AboutSection() {
               transition={{ delay: 1.2 }}
             >
               <Link
-                href="/notre-histoire"
+                href="/a-propos"
                 className="group relative inline-flex items-center gap-4 px-8 py-4 bg-gradient-to-br from-zinc-900 via-black to-zinc-900 border border-amber-400/20 rounded-full hover:border-amber-400/40 transition-all duration-500 hover:shadow-lg hover:shadow-amber-400/10"
               >
                 <span className="text-sm text-amber-200/90 group-hover:text-white tracking-wider uppercase font-medium">
                   Découvrir notre histoire
                 </span>
                 <ArrowRight className="w-4 h-4 text-amber-300/90 group-hover:translate-x-1 transition-transform duration-300" />
-
-                {/* Effet de gradient au hover */}
                 <div className="absolute inset-0 bg-gradient-to-r from-amber-400/5 via-amber-300/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-full" />
               </Link>
             </motion.div>
           </motion.div>
 
-          {/* Image sophistiquée */}
           <motion.div
             className="relative aspect-[3/4] lg:aspect-[4/5] lg:order-2"
             initial={{ opacity: 0, scale: 1.05 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1.2, delay: 0.3 }}
           >
-            {/* Container avec bordures dorées */}
             <div className="relative h-full rounded-2xl overflow-hidden border border-amber-400/20 hover:border-amber-400/30 transition-colors duration-700 group">
-              {/* Overlay sophistiqué */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-20" />
               <div className="absolute inset-0 bg-gradient-to-tr from-black/40 via-transparent to-transparent z-20" />
 
-              {/* Image principale */}
               <Image
                 src="/hand.png"
                 alt="Homme élégant portant des bijoux LUXORUM"
@@ -173,7 +151,6 @@ export function AboutSection() {
                 priority
               />
 
-              {/* Éléments décoratifs */}
               <div className="absolute top-4 right-4 z-30">
                 <motion.div
                   className="w-3 h-3 bg-amber-400/60 rounded-full"
@@ -203,7 +180,6 @@ export function AboutSection() {
                 />
               </div>
 
-              {/* Badge qualité sur l'image */}
               <motion.div
                 className="absolute bottom-6 left-6 z-30 flex items-center gap-2 px-4 py-2 bg-black/80 border border-amber-400/30 rounded-full backdrop-blur-sm"
                 initial={{ opacity: 0, y: 20 }}
@@ -216,18 +192,15 @@ export function AboutSection() {
                 </span>
               </motion.div>
 
-              {/* Effet de lueur au hover */}
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-10 pointer-events-none">
                 <div className="absolute inset-px rounded-2xl bg-gradient-to-tr from-amber-400/10 via-transparent to-amber-300/5" />
               </div>
             </div>
 
-            {/* Cadre décoratif externe */}
             <div className="absolute -inset-4 border border-zinc-800/30 rounded-3xl pointer-events-none" />
           </motion.div>
         </div>
 
-        {/* Section valeurs ajoutée */}
         <motion.div
           className="mt-24 pt-16 border-t border-zinc-800/50"
           initial={{ opacity: 0, y: 50 }}

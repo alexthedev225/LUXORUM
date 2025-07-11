@@ -5,7 +5,6 @@ import { Instagram, Twitter, Linkedin } from "lucide-react";
 import { motion } from "framer-motion";
 import { useIsAuthOrAdminPage } from "@/hooks/useIsAuthPage";
 
-
 export function Footer() {
   const fadeInUp = {
     hidden: { opacity: 0, y: 20 },
@@ -19,9 +18,20 @@ export function Footer() {
   ];
 
   const footerLinks = {
-    navigation: ["Boutique", "Collections", "À propos", "Contact"],
-    legal: ["Mentions légales", "CGV", "Politique de confidentialité", "FAQ"],
+    navigation: [
+      { label: "Accueil", href: "/" },
+      { label: "Boutique", href: "/boutique" },
+      { label: "À propos", href: "/a-propos" },
+      { label: "Contact", href: "/contact" },
+    ],
+    legal: [
+      { label: "Mentions légales", href: "/mentions-legales" },
+      { label: "CGV", href: "/conditions-generales" },
+      { label: "Politique de confidentialité", href: "/confidentialite" },
+      { label: "FAQ", href: "/faq" },
+    ],
   };
+
   const isAuthPage = useIsAuthOrAdminPage();
 
   if (isAuthPage) return null;
@@ -36,13 +46,13 @@ export function Footer() {
               Navigation
             </h4>
             <ul className="space-y-4">
-              {footerLinks.navigation.map((item) => (
-                <li key={item}>
+              {footerLinks.navigation.map(({ label, href }) => (
+                <li key={label}>
                   <Link
-                    href="#"
+                    href={href}
                     className="text-sm text-zinc-400 hover:text-white tracking-wide font-light transition-colors"
                   >
-                    {item}
+                    {label}
                   </Link>
                 </li>
               ))}
@@ -55,13 +65,13 @@ export function Footer() {
               Légal
             </h4>
             <ul className="space-y-4">
-              {footerLinks.legal.map((item) => (
-                <li key={item}>
+              {footerLinks.legal.map(({ label, href }) => (
+                <li key={label}>
                   <Link
-                    href="#"
+                    href={href}
                     className="text-sm text-zinc-400 hover:text-white tracking-wide font-light transition-colors"
                   >
-                    {item}
+                    {label}
                   </Link>
                 </li>
               ))}
@@ -110,7 +120,7 @@ export function Footer() {
         </div>
         {/* Grand titre centré en bas */}
         <div className="w-full mt-10 flex justify-center overflow-visible">
-          <h1 className="cinzel-decorative-black text-[25vw] md:text-[20vw] lg:text-[12vw] text-amber-200 tracking-tight break-words max-w-full font-bold text-center">
+          <h1 className="cinzel-decorative-black text-[10vw]   text-amber-200 tracking-tight break-words max-w-full font-bold text-center">
             LUXORUM
           </h1>
         </div>

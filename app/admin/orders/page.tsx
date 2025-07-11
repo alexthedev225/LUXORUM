@@ -2,22 +2,23 @@
 
 import { OrdersList } from "@/components/admin/OrdersList";
 
+
+interface OrderItem {
+  productId: string | null; // _id du produit ou null si supprimé
+  name: string; // nom sauvegardé au moment de la commande
+  price: number; // prix sauvegardé au moment de la commande (en centimes)
+  images: string[]; // tableau d'images (vide si produit supprimé)
+  quantity: number;
+}
+
 interface Order {
   _id: string;
   amount: number;
-  status: string;
+  status: "paid" | "pending" | "cancelled" | string;
   createdAt: string;
-  items: {
-    product: {
-      name: string;
-      price: number;
-      images: string[];
-    };
-    quantity: number;
-  }[];
+  items: OrderItem[];
   userId: string;
 }
-
 export default async function AdminOrdersPage() {
   const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/orders`, {
     cache: "no-store",

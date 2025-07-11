@@ -2,6 +2,7 @@ import Order from "@/models/Order";
 import dbConnect from "@/lib/mongoose";
 import { withAuth } from "@/utils/withAuth";
 import { NextResponse } from "next/server";
+import "@/models/Product";
 
 export async function GET(req: Request) {
   return withAuth(req, async (_req, user) => {

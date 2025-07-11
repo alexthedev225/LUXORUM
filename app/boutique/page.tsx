@@ -3,7 +3,7 @@ import ProductGridWrapper from "@/components/sections/boutique/ProductGridWrappe
 
 export default function BoutiquePage() {
   return (
-    <div className="space-y-2 pb-16">
+    <div className="space-y-2 mb-2">
       <HeroBoutiqueSection />
       <ProductGridWrapper />
     </div>

@@ -34,15 +34,17 @@ export function StepForm({ onSubmit, loading, error }: StepFormProps) {
   };
 
   const inputClassName = `
-    w-full bg-black/60 border border-zinc-800/50 rounded-xl px-4 py-3 
-    text-white placeholder:text-zinc-600 
-    focus:border-amber-400/30 focus:ring-1 focus:ring-amber-400/20 focus:bg-black/80 
-    transition-all duration-300 group-hover:border-zinc-700/50
-  `;
+  w-full bg-black/60 border border-zinc-800/50 rounded-xl px-4 py-3 
+  text-white text-sm placeholder:text-zinc-600 
+  focus:border-amber-400/30 focus:ring-1 focus:ring-amber-400/20 focus:bg-black/80 
+  transition-all duration-300 group-hover:border-zinc-700/50
+`;
+
 
   const labelClassName = `
-    block text-xs tracking-[0.3em] text-white/90 uppercase font-light mb-2
-  `;
+  block text-sm tracking-wide uppercase text-zinc-300 font-medium mb-2
+`;
+
 
   return (
     <form onSubmit={handleFormSubmit} className="space-y-6">

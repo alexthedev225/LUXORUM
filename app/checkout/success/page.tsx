@@ -10,6 +10,7 @@ export default function CheckoutSuccessPage() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
   const { clearCart } = useCartStore();
+  const paymentIntentId = searchParams.get("payment_intent"); 
 
   useEffect(() => {
     clearCart();
@@ -121,7 +122,7 @@ export default function CheckoutSuccessPage() {
                 Transaction
               </p>
               <p className="text-sm text-amber-300/90 font-mono break-all">
-                {sessionId ?? "Aucune"}
+                {paymentIntentId ?? sessionId ?? "Aucune"}
               </p>
             </div>
 

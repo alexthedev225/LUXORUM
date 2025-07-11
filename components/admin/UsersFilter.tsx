@@ -108,13 +108,13 @@ export default function UsersFilter({
               className="absolute left-4 top-1/2 -translate-y-1/2 h-6 w-6 stroke-amber-400 opacity-60 group-focus-within:opacity-100 transition-opacity duration-300 z-10"
             />
             <Select
-              id="roleFilter"
               onValueChange={(val) =>
                 setFilterRole(val === "all" ? undefined : val)
               }
               value={filterRole || "all"}
             >
               <SelectTrigger
+                id="roleFilter"
                 aria-label="Filtrer par rôle"
                 className="
                   pl-14 bg-black/50 border border-amber-400/20 rounded-2xl h-14
@@ -173,7 +173,7 @@ export default function UsersFilter({
                 px-8
                 shadow-md
                 transition-colors duration-300
-                focus-visible:outline focus-visible:outline-amber-400/60
+                 focus-visible:outline-amber-400/60
                 focus-visible:outline-4
               "
             >

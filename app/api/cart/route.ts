@@ -63,7 +63,7 @@ export async function POST(req: Request) {
       } else {
         // Vérifier si produit déjà dans panier
         const index = cart.items.findIndex(
-          (item) => item.product.toString() === productId
+          (item: { product: { toString: () => any; }; }) => item.product.toString() === productId
         );
         if (index > -1) {
           // Incrémenter quantité

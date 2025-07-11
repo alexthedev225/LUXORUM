@@ -1,4 +1,4 @@
-import { Schema, model, Document, Types } from "mongoose";
+import { Schema, model, models, Document, Types } from "mongoose";
 
 export interface IAddress extends Document {
   user: Types.ObjectId;
@@ -27,5 +27,7 @@ const AddressSchema = new Schema<IAddress>(
   { timestamps: true }
 );
 
-const Address = model<IAddress>("Address", AddressSchema);
+// 🛡️ Eviter l'erreur de redéclaration dans Next.js
+const Address = models.Address || model<IAddress>("Address", AddressSchema);
+
 export default Address;
