@@ -13,9 +13,9 @@ interface Product {
 
 
 
-export default async function ProductEditPage({ params }: { params: { id: string } }) {
-  const productId = await params.id;
-
+export default async function ProductEditPage(props: Promise<{ params: { id: string } }>) {
+  const { params } = await props; // ici tu attends la résolution du Promise
+  const productId = params.id;
   // Appel à ton API locale
   const res = await fetch(
     `${process.env.BASE_URL || ""}/api/products/${productId}`,
