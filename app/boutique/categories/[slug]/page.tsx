@@ -20,9 +20,6 @@ type Product = {
   category: Category | string;
 };
 
-type Props = {
-  params: { slug: string };
-};
 
 // Fetch dynamique des catégories
 async function fetchCategories(): Promise<Category[]> {
@@ -47,7 +44,11 @@ async function fetchAllProducts(): Promise<Product[]> {
   return data.products;
 }
 
-export default async function CategoryPage({ params }: Props) {
+type Params = Promise<{ slug: string }>;
+
+export default async function CategoryPage(props: { params: Params }) {
+  const params = await props.params;
+
   function slugify(str: string) {
     return str
       .toLowerCase()
@@ -97,8 +98,6 @@ export default async function CategoryPage({ params }: Props) {
           productCardVariant="categorie"
         />
       </section>
-
-   
     </div>
   );
 }

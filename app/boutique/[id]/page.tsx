@@ -1,13 +1,14 @@
 import { ProductDetails } from "@/components/sections/boutique/ProductDetails";
 import { notFound } from "next/navigation";
 
-type Props = {
-  params: { id: string };
-};
+
+type Params = Promise<{ id: string }>;
 
 const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
 
-export async function generateMetadata({ params }: Props) {
+export async function generateMetadata(props: { params: Params }) {
+  const params = await props.params;
+
   const res = await fetch(`${BASE_URL}/api/products/${params.id}`, {
     cache: "no-store",
   });
@@ -24,7 +25,8 @@ export async function generateMetadata({ params }: Props) {
   };
 }
 
-export default async function ProductPage({ params }: Props) {
+export default async function ProductPage(props: { params: Params }) {
+  const params = await props.params;
   const res = await fetch(`${BASE_URL}/api/products/${params.id}`, {
     cache: "no-store",
   });

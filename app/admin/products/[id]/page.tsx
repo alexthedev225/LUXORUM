@@ -23,7 +23,8 @@ interface Params {
 }
 
 // Composant serveur par défaut (pas "use client")
-export default async function ProductPage({ params }: { params: Params }) {
+export default async function ProductPage(props: { params: Promise<Params> }) {
+  const params = await props.params;
   const { id } = params;
 
   // Appel fetch côté serveur (avec URL absolue, adapter si besoin)
