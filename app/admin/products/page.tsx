@@ -17,11 +17,10 @@ type Product = {
 
 const PRODUCTS_PER_PAGE = 6;
 
-export default async function AdminProductsPage({
-  searchParams,
-}: {
-  searchParams: { search?: string; page?: string };
+export default async function AdminProductsPage(props: {
+  searchParams: Promise<{ search?: string; page?: string }>;
 }) {
+  const searchParams = await props.searchParams;
   const page = parseInt(searchParams.page || "1", 10);
   const search = searchParams.search || "";
 
