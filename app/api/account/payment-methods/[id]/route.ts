@@ -8,14 +8,14 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function DELETE(
   req: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { params } = context;
+  const { id } = await params;
 
   return withAuth(req, async () => {
     try {
       // Détacher la carte Stripe
-      await stripe.paymentMethods.detach(params.id);
+      await stripe.paymentMethods.detach(id);
 
       return NextResponse.json({ message: "Carte supprimée" });
     } catch (error) {
@@ -27,15 +27,15 @@ export async function DELETE(
 
 export async function PUT(
   req: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { params } = context;
+  const { id } = await params;
 
   return withAuth(req, async (_req, user) => {
     try {
       // Mettre à jour la carte par défaut dans Stripe
       await stripe.customers.update(user.stripeCustomerId, {
-        invoice_settings: { default_payment_method: params.id },
+        invoice_settings: { default_payment_method: id },
       });
 
       return NextResponse.json({ message: "Carte définie par défaut" });

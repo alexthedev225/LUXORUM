@@ -1,11 +1,11 @@
 import User from "@/models/User";
 import dbConnect from "@/lib/mongoose";
 import { withAuth } from "@/utils/withAuth";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   return withAuth(req, async (_req, user) => {
     if (user.role !== "ADMIN") {
@@ -18,7 +18,7 @@ export async function GET(
     await dbConnect();
 
     try {
-      const { id } = params;
+      const { id } = await params;
       const foundUser = await User.findById(id).select("-password").lean();
 
       if (!foundUser) {
@@ -37,8 +37,8 @@ export async function GET(
 }
 
 export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   return withAuth(req, async (req, user) => {
     if (user.role !== "ADMIN") {
@@ -51,7 +51,7 @@ export async function PUT(
     await dbConnect();
 
     try {
-      const { id } = params;
+      const { id } = await params;
       const data = await req.json();
 
       // Exclure la mise à jour du password ici (si besoin, faire une route dédiée)
@@ -87,8 +87,8 @@ export async function PUT(
 }
 
 export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   return withAuth(req, async (_req, user) => {
     if (user.role !== "ADMIN") {
@@ -101,7 +101,7 @@ export async function DELETE(
     await dbConnect();
 
     try {
-      const { id } = params;
+      const { id } = await params;
       const deletedUser = await User.findByIdAndDelete(id).select("-password");
 
       if (!deletedUser) {

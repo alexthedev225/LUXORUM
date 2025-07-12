@@ -1,12 +1,11 @@
 import User, { IUser } from "@/models/User";
 import dbConnect from "@/lib/mongoose";
 import { withAuth } from "@/utils/withAuth";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { FilterQuery } from "mongoose";
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   return withAuth(req, async (_req, user) => {
-    // Vérification du rôle ADMIN dans le handler
     if (user.role !== "ADMIN") {
       return NextResponse.json(
         { message: "Accès refusé : réservé aux administrateurs" },

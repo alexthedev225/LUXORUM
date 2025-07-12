@@ -1,7 +1,7 @@
-// app/api/orders/route.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/mongoose";
 import Order from "@/models/Order";
+
 interface Product {
   _id: string;
   name: string;
@@ -16,7 +16,7 @@ interface OrderItem {
   quantity: number;
 }
 
-export async function GET() {
+export async function GET(_req: NextRequest) {
   try {
     await connectDB();
 
@@ -25,23 +25,22 @@ export async function GET() {
       .populate("items.product", "name images price")
       .lean(); // important pour manipuler l'objet en plain JS
 
-   const enrichedOrders = orders.map((order) => ({
-     ...order,
-     items: order.items.map((item: OrderItem) => {
-       const product = item.product as Product | null;
+    const enrichedOrders = orders.map((order) => ({
+      ...order,
+      items: order.items.map((item: OrderItem) => {
+        const product = item.product as Product | null;
 
-       return {
-         productId:
-           product?._id ??
-           (typeof item.product === "string" ? item.product : null),
-         name: product?.name ?? item.name,
-         price: product?.price ?? item.price,
-         images: product?.images ?? [],
-         quantity: item.quantity,
-       };
-     }),
-   }));
-
+        return {
+          productId:
+            product?._id ??
+            (typeof item.product === "string" ? item.product : null),
+          name: product?.name ?? item.name,
+          price: product?.price ?? item.price,
+          images: product?.images ?? [],
+          quantity: item.quantity,
+        };
+      }),
+    }));
 
     return NextResponse.json(enrichedOrders);
   } catch (error) {

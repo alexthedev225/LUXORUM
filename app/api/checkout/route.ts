@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { withAuth } from "@/utils/withAuth";
 import connect from "@/lib/mongoose";
 import Cart from "@/models/Cart";
@@ -14,9 +14,7 @@ interface CartItem {
   quantity: number;
 }
 
-function isStripeError(
-  error: unknown
-): error is {
+function isStripeError(error: unknown): error is {
   code?: string;
   message: string;
   raw?: { payment_intent?: { id?: string } };
@@ -29,8 +27,7 @@ function isStripeError(
   );
 }
 
-
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   await connect();
 
   return withAuth(req, async (_req, user) => {

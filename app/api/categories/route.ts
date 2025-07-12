@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongoose"; // ta fonction de connexion à MongoDB
 import Category from "@/models/Category";
 import Product from "@/models/Product"; // ou le bon chemin absolu/relatif vers ton modèle Product
@@ -29,7 +29,6 @@ export async function GET() {
       })
     );
 
-
     return NextResponse.json(categoriesWithCount);
   } catch (error) {
     console.error("Erreur récupération catégories:", error);
@@ -40,7 +39,7 @@ export async function GET() {
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   await dbConnect();
   try {
     const data = await req.json();

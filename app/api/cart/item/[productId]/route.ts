@@ -1,18 +1,18 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { withAuth } from "@/utils/withAuth";
 import Cart from "@/models/Cart";
 import connect from "@/lib/mongoose";
 
 export async function DELETE(
-  req: Request,
-  { params }: { params: { productId: string } }
-) {
+  req: NextRequest, // <-- ici
+  { params }: { params: Promise<{ productId: string }> }
+): Promise<Response | NextResponse> {
+  const { productId } = await params;
+
   await connect();
 
   return withAuth(req, async (_req, user) => {
     try {
-      const { productId } = params;
-
       if (!productId) {
         return NextResponse.json(
           { message: "productId manquant" },
@@ -31,7 +31,8 @@ export async function DELETE(
 
       // Vérifier si produit est dans le panier
       const itemIndex = cart.items.findIndex(
-        (item: { product: { toString: () => string; }; }) => item.product.toString() === productId
+        (item: { product: { toString: () => string } }) =>
+          item.product.toString() === productId
       );
 
       if (itemIndex === -1) {

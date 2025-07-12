@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import { cacheGet, cacheSet, cacheDelete } from "@/lib/redis";
@@ -7,7 +7,7 @@ import "@/models/Category"; // Assure-toi que ce chemin est correct selon ta str
 import dbConnect from "@/lib/mongoose";
 import { FilterQuery, ProjectionType } from "mongoose";
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   await dbConnect();
   const { searchParams } = new URL(req.url);
 
@@ -17,8 +17,6 @@ export async function GET(req: Request) {
   const category = searchParams.get("category") || undefined;
   const skip = (page - 1) * limit;
 
-  // Pour afficher tout ce dont le front a besoin, on force ici la projection complète
-  // Sinon on peut garder la logique du paramètre fields si tu veux filtrer côté client
   const fields = [
     "_id",
     "name",
@@ -45,7 +43,7 @@ export async function GET(req: Request) {
     const cached = await cacheGet(cacheKey);
     if (cached) return NextResponse.json(cached);
 
-   const filter: FilterQuery<IProduct> = {};
+    const filter: FilterQuery<IProduct> = {};
     if (category) filter.category = category;
     if (search) {
       filter.$or = [
@@ -54,7 +52,6 @@ export async function GET(req: Request) {
       ];
     }
 
-    // Récupération avec population de category (seulement _id et name)
     const [products, total] = await Promise.all([
       Product.find(filter, projection)
         .populate("category", "name _id")
@@ -75,7 +72,7 @@ export async function GET(req: Request) {
       },
     };
 
-    await cacheSet(cacheKey, result, 300); // cache 5 minutes
+    await cacheSet(cacheKey, result, 300);
     return NextResponse.json(result);
   } catch (error) {
     console.error("❌ GET /api/products error:", error);
@@ -86,9 +83,8 @@ export async function GET(req: Request) {
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   await dbConnect();
-  // console.log("▶️ [API] POST /api/products - Début du traitement"); // décommenter si debug
 
   try {
     const formData = await req.formData();
@@ -119,7 +115,6 @@ export async function POST(req: Request) {
     const uploadDir = path.join(process.cwd(), "public", "uploads", "products");
 
     for (const imageFile of imageFiles) {
-      // Vérifie que l'élément est un fichier (Blob)
       if (imageFile instanceof Blob) {
         await mkdir(uploadDir, { recursive: true });
         const buffer = Buffer.from(await imageFile.arrayBuffer());
@@ -138,11 +133,9 @@ export async function POST(req: Request) {
       images,
     });
 
-    // Supprime les caches qui peuvent être invalides
     await Promise.all([
       cacheDelete("products:all"),
       cacheDelete(`products:${product.category}`),
-      // éventuellement, si tu as d'autres clés de cache spécifiques, les supprimer aussi
     ]);
 
     return NextResponse.json(product);

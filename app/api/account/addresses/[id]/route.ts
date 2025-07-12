@@ -14,16 +14,16 @@ const addressUpdateSchema = z.object({
 });
 
 export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = params;
+  const { id } = await params;
 
-  return withAuth(req, async (_req, user) => {
+  return withAuth(request, async (_req, user) => {
     await dbConnect();
 
     try {
-      const data = await req.json();
+      const data = await request.json();
 
       const parseResult = addressUpdateSchema.safeParse(data);
       if (!parseResult.success) {
@@ -35,7 +35,7 @@ export async function PUT(
 
       if (parseResult.data.isDefault) {
         await Address.updateMany(
-          { user: user.userId, isDefault: true },
+          { userId: user.userId, isDefault: true },
           { isDefault: false }
         );
       }
@@ -62,12 +62,12 @@ export async function PUT(
 }
 
 export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = params;
+  const { id } = await params;
 
-  return withAuth(req, async (_req, user) => {
+  return withAuth(request, async (_req, user) => {
     await dbConnect();
 
     try {

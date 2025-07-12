@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import connect from "@/lib/mongoose";
 import User from "@/models/User";
 import Stripe from "stripe";
@@ -7,6 +7,7 @@ import { withAuth } from "@/utils/withAuth";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",
 });
+
 interface StripeError extends Error {
   code?: string;
   raw?: {
@@ -16,9 +17,8 @@ interface StripeError extends Error {
   };
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   return withAuth(req, async (_req, user) => {
-    // Connexion à MongoDB ici
     await connect();
 
     try {
@@ -31,9 +31,6 @@ export async function POST(req: Request) {
         );
       }
 
-      // Vérifier que l'utilisateur a un stripeCustomerId
-      // (même si tu as le user dans withAuth, le user peut être juste un payload de session,
-      // on vérifie en base ici pour être sûr)
       const dbUser = await User.findOne({ email: user.email });
       if (!dbUser || !dbUser.stripeCustomerId) {
         return NextResponse.json(

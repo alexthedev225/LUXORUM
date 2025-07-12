@@ -1,17 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/mongoose"; // Assure-toi que ce fichier existe
+import dbConnect from "@/lib/mongoose";
 import Product from "@/models/Product";
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import { cacheDelete } from "@/lib/redis";
 
-
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   await dbConnect();
-  const { id } = params;
+  const { id } = await params;
 
   try {
     const product = await Product.findById(id).populate("category");
@@ -30,17 +29,15 @@ export async function GET(
 }
 
 export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   await dbConnect();
-  const { id } = params;
+  const { id } = await params;
 
   try {
-    // Récupérer formData de la requête PUT
     const formData = await req.formData();
 
-    // Extraire champs texte
     const name = formData.get("name")?.toString() || "";
     const description = formData.get("description")?.toString() || "";
     const price = Number(formData.get("price") ?? 0);
@@ -55,7 +52,6 @@ export async function PUT(
       : undefined;
     const discount = discountRaw ? Number(discountRaw) : undefined;
 
-    // Validation minimale
     if (!name || !description || isNaN(price) || isNaN(stock) || !category) {
       return NextResponse.json(
         { error: "Champs manquants ou invalides" },
@@ -63,7 +59,6 @@ export async function PUT(
       );
     }
 
-    // Upload images
     const imageFiles = formData.getAll("images");
     const images: string[] = [];
     const uploadDir = path.join(process.cwd(), "public", "uploads", "products");
@@ -82,7 +77,6 @@ export async function PUT(
       }
     }
 
-    // Récupérer le produit actuel pour éventuellement garder les anciennes images si pas de nouvelles uploadées
     const product = await Product.findById(id);
     if (!product) {
       return NextResponse.json(
@@ -91,10 +85,8 @@ export async function PUT(
       );
     }
 
-    // Si aucune nouvelle image uploadée, garder les anciennes images
     const updatedImages = images.length > 0 ? images : product.images;
 
-    // Mise à jour produit
     product.name = name;
     product.description = description;
     product.price = price;
@@ -106,7 +98,6 @@ export async function PUT(
 
     await product.save();
 
-    // Invalider cache Redis lié aux produits
     await cacheDelete("products:all");
     await cacheDelete(`products:${category}`);
 
@@ -122,10 +113,10 @@ export async function PUT(
 
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   await dbConnect();
-  const { id } = params;
+  const { id } = await params;
 
   try {
     const deleted = await Product.findByIdAndDelete(id);

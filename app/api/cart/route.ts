@@ -1,14 +1,15 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { withAuth } from "@/utils/withAuth";
+import connect from "@/lib/mongoose";
 import Cart from "@/models/Cart";
 import Product from "@/models/Product";
-import connect from "@/lib/mongoose"; // ta fonction connect
+
 interface CartItem {
   product: string; // id produit
   quantity: number;
 }
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   await connect();
 
   return withAuth(req, async (_req, user) => {
@@ -30,7 +31,7 @@ export async function GET(req: Request) {
   });
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   await connect();
 
   return withAuth(req, async (req, user) => {
@@ -83,7 +84,7 @@ export async function POST(req: Request) {
   });
 }
 
-export async function PUT(req: Request) {
+export async function PUT(req: NextRequest) {
   await connect();
 
   return withAuth(req, async (req, user) => {
@@ -128,10 +129,12 @@ export async function PUT(req: Request) {
       }
 
       // Remplacer les items par ceux reçus
-    cart.items = items.map((item: { productId: string; quantity: number }) => ({
-      product: item.productId,
-      quantity: item.quantity,
-    }));
+      cart.items = items.map(
+        (item: { productId: string; quantity: number }) => ({
+          product: item.productId,
+          quantity: item.quantity,
+        })
+      );
 
       await cart.save();
       return NextResponse.json(cart);
@@ -142,7 +145,7 @@ export async function PUT(req: Request) {
   });
 }
 
-export async function DELETE(req: Request) {
+export async function DELETE(req: NextRequest) {
   await connect();
 
   return withAuth(req, async (_req, user) => {
