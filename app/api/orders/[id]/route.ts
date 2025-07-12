@@ -4,11 +4,14 @@ import connectToDB from "@/lib/mongoose";
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params; // <-- await ici
+
     await connectToDB();
-    const order = await Order.findById(params.id).populate("userId", "email");
+
+    const order = await Order.findById(id).populate("userId", "email");
     if (!order)
       return new NextResponse("Commande introuvable", { status: 404 });
 
@@ -21,13 +24,17 @@ export async function GET(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params; // <-- await ici
+
     await connectToDB();
+
     const { status } = await req.json();
+
     const updated = await Order.findByIdAndUpdate(
-      params.id,
+      id,
       { status },
       { new: true }
     );

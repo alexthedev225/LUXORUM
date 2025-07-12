@@ -1,11 +1,9 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useCartStore } from "@/stores/cart";
 import { useState } from "react";
 
 export function useLogout() {
-  const router = useRouter();
   const { setItems } = useCartStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
