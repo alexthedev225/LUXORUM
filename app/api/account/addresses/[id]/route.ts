@@ -1,7 +1,7 @@
-import Address from "@/models/Address";
+import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongoose";
+import Address from "@/models/Address";
 import { withAuth } from "@/utils/withAuth";
-import { NextResponse } from "next/server";
 import { z } from "zod";
 
 const addressUpdateSchema = z.object({
@@ -14,9 +14,12 @@ const addressUpdateSchema = z.object({
 });
 
 export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: { params: { id: string } }
 ) {
+  const { params } = context;
+  const id = params.id;
+
   return withAuth(req, async (req, user) => {
     await dbConnect();
 
@@ -32,7 +35,6 @@ export async function PUT(
       }
 
       if (parseResult.data.isDefault) {
-        // Retirer l'adresse par défaut précédente
         await Address.updateMany(
           { user: user.userId, isDefault: true },
           { isDefault: false }
@@ -40,7 +42,7 @@ export async function PUT(
       }
 
       const updatedAddress = await Address.findOneAndUpdate(
-        { userId: params.id, user: user.userId },
+        { userId: id, user: user.userId },
         parseResult.data,
         { new: true, runValidators: true }
       );
@@ -61,15 +63,18 @@ export async function PUT(
 }
 
 export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: { params: { id: string } }
 ) {
+  const { params } = context;
+  const id = params.id;
+
   return withAuth(req, async (_req, user) => {
     await dbConnect();
 
     try {
       const deletedAddress = await Address.findOneAndDelete({
-        userId: params.id,
+        userId: id,
         user: user.userId,
       });
 

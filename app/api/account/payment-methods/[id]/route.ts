@@ -1,5 +1,5 @@
 import { withAuth } from "@/utils/withAuth";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -7,9 +7,11 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 });
 
 export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: { params: { id: string } }
 ) {
+  const { params } = context;
+
   return withAuth(req, async () => {
     try {
       // Détacher la carte Stripe
@@ -24,9 +26,11 @@ export async function DELETE(
 }
 
 export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: { params: { id: string } }
 ) {
+  const { params } = context;
+
   return withAuth(req, async (_req, user) => {
     try {
       // Mettre à jour la carte par défaut dans Stripe

@@ -1,16 +1,16 @@
 import { withAuth } from "@/utils/withAuth";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",
 });
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   return withAuth(req, async (_req, user) => {
     try {
       const paymentMethods = await stripe.paymentMethods.list({
-        customer: user.stripeCustomerId, // suppose que ce champ existe
+        customer: user.stripeCustomerId,
         type: "card",
       });
 
@@ -22,7 +22,7 @@ export async function GET(req: Request) {
   });
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   return withAuth(req, async (req, user) => {
     try {
       const { paymentMethodId } = await req.json();
@@ -34,12 +34,10 @@ export async function POST(req: Request) {
         );
       }
 
-      // Attacher la carte au client Stripe
       await stripe.paymentMethods.attach(paymentMethodId, {
         customer: user.stripeCustomerId,
       });
 
-      // Mettre à jour la méthode par défaut dans Stripe
       await stripe.customers.update(user.stripeCustomerId, {
         invoice_settings: { default_payment_method: paymentMethodId },
       });

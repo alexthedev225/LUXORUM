@@ -1,26 +1,25 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import connect from "@/lib/mongoose";
 import bcrypt from "bcryptjs";
-import { loginSchema } from "@/lib/validations/auth"; // Zod schema pour login
+import { loginSchema } from "@/lib/validations/auth";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { verifyRecaptchaToken } from "@/lib/recaptcha";
 import { validateCsrfToken } from "@/lib/csrf";
 import * as jose from "jose";
 import Stripe from "stripe";
+import User from "@/models/User";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",
 });
-
-import User from "@/models/User";
 
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
   limiter: Ratelimit.slidingWindow(5, "10 m"),
 });
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     await connect();
 
@@ -39,11 +38,7 @@ export async function POST(req: Request) {
 
     // 2. Vérification CSRF
     const csrfTokenFromHeader = req.headers.get("x-csrf-token");
-    const csrfTokenFromCookie = req.headers
-      .get("cookie")
-      ?.split("; ")
-      .find((c) => c.startsWith("csrf-token="))
-      ?.split("=")[1];
+    const csrfTokenFromCookie = req.cookies.get("csrf-token")?.value;
 
     if (!csrfTokenFromHeader || !csrfTokenFromCookie) {
       return NextResponse.json(
@@ -98,7 +93,8 @@ export async function POST(req: Request) {
         { status: 401 }
       );
     }
-    // --- Ajout création stripeCustomerId si absent ---
+
+    // Création stripeCustomerId si absent
     if (!user.stripeCustomerId) {
       const customer = await stripe.customers.create({
         email: user.email,
@@ -107,6 +103,7 @@ export async function POST(req: Request) {
       user.stripeCustomerId = customer.id;
       await user.save();
     }
+
     // 6. Vérification du secret JWT
     if (!process.env.JWT_SECRET) {
       throw new Error(
@@ -120,7 +117,7 @@ export async function POST(req: Request) {
       userId: user._id.toString(),
       email: user.email,
       role: user.role,
-      stripeCustomerId: user.stripeCustomerId, // <-- bien ici
+      stripeCustomerId: user.stripeCustomerId,
     })
       .setProtectedHeader({ alg: "HS256" })
       .setExpirationTime("24h")
@@ -140,7 +137,7 @@ export async function POST(req: Request) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 24 * 60 * 60, // 24 heures
+      maxAge: 24 * 60 * 60,
       path: "/",
     });
 

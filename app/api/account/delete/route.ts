@@ -1,9 +1,9 @@
 import User from "@/models/User";
 import dbConnect from "@/lib/mongoose";
 import { withAuth } from "@/utils/withAuth";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function DELETE(req: Request) {
+export async function DELETE(req: NextRequest) {
   return withAuth(req, async (_req, user) => {
     await dbConnect();
 

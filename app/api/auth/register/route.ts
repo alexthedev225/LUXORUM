@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import connect from "@/lib/mongoose";
 import bcrypt from "bcryptjs";
 import { registerSchema } from "@/lib/validations/auth";
@@ -7,7 +7,6 @@ import { Redis } from "@upstash/redis";
 import { verifyRecaptchaToken } from "@/lib/recaptcha";
 import { validateCsrfToken } from "@/lib/csrf";
 import Stripe from "stripe";
-
 import User from "@/models/User";
 
 const ratelimit = new Ratelimit({
@@ -19,7 +18,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",
 });
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     await connect();
 
@@ -34,12 +33,9 @@ export async function POST(req: Request) {
       );
     }
 
+    // Récupération sécurisée du cookie CSRF
     const csrfTokenFromHeader = req.headers.get("x-csrf-token");
-    const csrfTokenFromCookie = req.headers
-      .get("cookie")
-      ?.split("; ")
-      .find((c) => c.startsWith("csrf-token="))
-      ?.split("=")[1];
+    const csrfTokenFromCookie = req.cookies.get("csrf-token")?.value;
 
     if (!csrfTokenFromHeader || !csrfTokenFromCookie) {
       return NextResponse.json(
@@ -99,13 +95,13 @@ export async function POST(req: Request) {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // 1. Création du customer Stripe
+    // Création du customer Stripe
     const customer = await stripe.customers.create({
       email,
       name: `${firstName ?? ""} ${lastName ?? ""}`.trim(),
     });
 
-    // 2. Création de l'utilisateur avec l'ID Stripe
+    // Création de l'utilisateur
     const newUser = new User({
       email: email.toLowerCase(),
       username: username.toLowerCase(),

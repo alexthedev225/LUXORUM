@@ -1,11 +1,11 @@
 import Order, { IOrder } from "@/models/Order";
 import dbConnect from "@/lib/mongoose";
 import { withAuth } from "@/utils/withAuth";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { FilterQuery } from "mongoose";
 import "@/models/Product";
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   return withAuth(req, async (_req, user) => {
     await dbConnect();
 

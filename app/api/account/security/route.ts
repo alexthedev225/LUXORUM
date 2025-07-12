@@ -1,8 +1,7 @@
-//api/account/security
 import User from "@/models/User";
 import dbConnect from "@/lib/mongoose";
 import { withAuth } from "@/utils/withAuth";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 
@@ -11,7 +10,7 @@ const passwordChangeSchema = z.object({
   newPassword: z.string().min(6),
 });
 
-export async function PUT(req: Request) {
+export async function PUT(req: NextRequest) {
   return withAuth(req, async (req, user) => {
     await dbConnect();
 
@@ -59,7 +58,7 @@ export async function PUT(req: Request) {
   });
 }
 
-export async function DELETE(req: Request) {
+export async function DELETE(req: NextRequest) {
   return withAuth(req, async (_req, user) => {
     await dbConnect();
 

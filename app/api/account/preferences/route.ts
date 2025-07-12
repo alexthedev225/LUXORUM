@@ -1,7 +1,7 @@
 import UserPreferences from "@/models/UserPreferences";
 import dbConnect from "@/lib/mongoose";
 import { withAuth } from "@/utils/withAuth";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 const preferencesSchema = z.object({
@@ -10,12 +10,14 @@ const preferencesSchema = z.object({
   notifications: z.boolean().optional(),
 });
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   return withAuth(req, async (_req, user) => {
     await dbConnect();
 
     try {
-      const prefs = await UserPreferences.findOne({ userId: user.userId }).lean();
+      const prefs = await UserPreferences.findOne({
+        userId: user.userId,
+      }).lean();
 
       if (!prefs) {
         return NextResponse.json({}, { status: 204 }); // Pas de contenu
@@ -29,7 +31,7 @@ export async function GET(req: Request) {
   });
 }
 
-export async function PUT(req: Request) {
+export async function PUT(req: NextRequest) {
   return withAuth(req, async (req, user) => {
     await dbConnect();
 

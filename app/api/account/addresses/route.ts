@@ -1,7 +1,7 @@
 import Address from "@/models/Address";
 import dbConnect from "@/lib/mongoose";
 import { withAuth } from "@/utils/withAuth";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 const addressSchema = z.object({
@@ -13,12 +13,11 @@ const addressSchema = z.object({
   isDefault: z.boolean().optional(),
 });
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   return withAuth(req, async (_req, user) => {
     await dbConnect();
 
     try {
-      
       const addresses = await Address.find({ user: user.userId }).lean();
       return NextResponse.json(addresses);
     } catch (error) {
@@ -28,7 +27,7 @@ export async function GET(req: Request) {
   });
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   return withAuth(req, async (req, user) => {
     await dbConnect();
 
@@ -43,7 +42,6 @@ export async function POST(req: Request) {
         );
       }
 
-      // Si isDefault true, retirer l'option par défaut des autres adresses
       if (parseResult.data.isDefault) {
         await Address.updateMany(
           { user: user.userId, isDefault: true },

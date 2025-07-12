@@ -1,7 +1,7 @@
 import User from "@/models/User";
 import dbConnect from "@/lib/mongoose";
 import { withAuth } from "@/utils/withAuth";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 const profileUpdateSchema = z.object({
@@ -11,7 +11,7 @@ const profileUpdateSchema = z.object({
   // email non modifiable ici (à adapter si besoin)
 });
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   return withAuth(req, async (_req, user) => {
     await dbConnect();
 
@@ -35,7 +35,7 @@ export async function GET(req: Request) {
   });
 }
 
-export async function PUT(req: Request) {
+export async function PUT(req: NextRequest) {
   return withAuth(req, async (req, user) => {
     await dbConnect();
 
