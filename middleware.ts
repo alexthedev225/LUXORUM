@@ -28,7 +28,7 @@ function setSecurityHeaders(res: NextResponse) {
 }
 
 export async function middleware(req: NextRequest) {
-  const { pathname, protocol } = req.nextUrl;
+  const { pathname } = req.nextUrl;
 
   // Forcer HTTPS uniquement en production
   if (

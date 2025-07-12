@@ -29,7 +29,7 @@ export async function getSession(
   sessionId: string
 ): Promise<SessionData | null> {
   const data = await redisClient.get(`session:${sessionId}`);
-  return data ? JSON.parse(data) : null;
+  return data ? JSON.parse(String(data)) : null;
 }
 
 export async function destroySession(sessionId: string): Promise<void> {

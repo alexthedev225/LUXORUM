@@ -1,5 +1,4 @@
 import { Schema, model, Document, Types, models } from "mongoose";
-import Product from "@/models/Product";
 
 export interface ICategory extends Document {
   name: string;

@@ -10,7 +10,7 @@ if (!MONGODB_URI) {
 }
 
 declare global {
-  var _mongoose: {
+  const _mongoose: {
     conn: Mongoose | null;
     promise: Promise<Mongoose> | null;
   };
