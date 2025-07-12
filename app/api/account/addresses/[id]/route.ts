@@ -17,10 +17,9 @@ export async function PUT(
   req: NextRequest,
   context: { params: { id: string } }
 ) {
-  const { params } = context;
-  const id = params.id;
+  const { id } = context.params;
 
-  return withAuth(req, async (req, user) => {
+  return withAuth(req, async (_req, user) => {
     await dbConnect();
 
     try {
@@ -42,7 +41,7 @@ export async function PUT(
       }
 
       const updatedAddress = await Address.findOneAndUpdate(
-        { userId: id, user: user.userId },
+        { userId: user.userId, _id: id },
         parseResult.data,
         { new: true, runValidators: true }
       );
@@ -66,16 +65,15 @@ export async function DELETE(
   req: NextRequest,
   context: { params: { id: string } }
 ) {
-  const { params } = context;
-  const id = params.id;
+  const { id } = context.params;
 
   return withAuth(req, async (_req, user) => {
     await dbConnect();
 
     try {
       const deletedAddress = await Address.findOneAndDelete({
-        userId: id,
-        user: user.userId,
+        userId: user.userId,
+        _id: id,
       });
 
       if (!deletedAddress) {
