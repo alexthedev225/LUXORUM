@@ -12,9 +12,12 @@ interface Product {
 }
 
 
+interface ProductEditPageProps {
+  params: Promise<{ id: string }>;
+}
 
-export default async function ProductEditPage(props: Promise<{ params: { id: string } }>) {
-  const { params } = await props; // ici tu attends la résolution du Promise
+export default async function ProductEditPage(props: ProductEditPageProps) {
+  const params = await props.params;
   const productId = params.id;
   // Appel à ton API locale
   const res = await fetch(
