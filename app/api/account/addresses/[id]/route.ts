@@ -15,9 +15,9 @@ const addressUpdateSchema = z.object({
 
 export async function PUT(
   req: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = context.params;
+  const { id } = params;
 
   return withAuth(req, async (_req, user) => {
     await dbConnect();
@@ -63,9 +63,9 @@ export async function PUT(
 
 export async function DELETE(
   req: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = context.params;
+  const { id } = params;
 
   return withAuth(req, async (_req, user) => {
     await dbConnect();
