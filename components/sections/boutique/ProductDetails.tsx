@@ -184,14 +184,17 @@ export function ProductDetails({ product }: Props) {
               className="relative group perspective-2000 flex  flex-col "
             >
               {/* Carte image centrée */}
-              <div className=" rounded-2xl bg-black/80 border-2 border-amber-200/20 p-4 shadow-lg w-max">
-                <Image
-                  src={product.images[0]}
-                  alt={product.name}
-                  width={400}
-                  height={400}
-                  className="object-contain rounded-2xl bg-transparent"
-                />
+              <div className="relative w-full max-w-sm rounded-2xl bg-black/80 border-2 border-amber-200/20 p-4 shadow-lg">
+                <div className="relative aspect-square rounded-2xl overflow-hidden bg-transparent">
+                  <Image
+                    src={product.images[0]}
+                    alt={product.name}
+                    fill
+                    className="object-contain"
+                    sizes="(max-width: 768px) 100vw, 400px"
+                    priority
+                  />
+                </div>
               </div>
 
               {/* Description détaillée sous l'image */}
