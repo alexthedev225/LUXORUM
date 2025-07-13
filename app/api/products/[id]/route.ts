@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongoose";
 import Product from "@/models/Product";
-import { mkdir, writeFile } from "fs/promises";
-import path from "path";
 import { cacheDelete } from "@/lib/redis";
+import cloudinary from "@/lib/cloudinary";
 
 export async function GET(
   _req: NextRequest,
@@ -60,20 +59,33 @@ export async function PUT(
     }
 
     const imageFiles = formData.getAll("images");
-    const images: string[] = [];
-    const uploadDir = path.join(process.cwd(), "public", "uploads", "products");
+    const newImages: string[] = [];
 
     for (const imageFile of imageFiles) {
       if (typeof imageFile === "object" && "arrayBuffer" in imageFile) {
-        await mkdir(uploadDir, { recursive: true });
         const buffer = Buffer.from(await (imageFile as Blob).arrayBuffer());
-        const fileName = `${Date.now()}-${(imageFile as File).name.replace(
-          /[^a-zA-Z0-9.]/g,
-          "_"
-        )}`;
-        const filePath = path.join(uploadDir, fileName);
-        await writeFile(filePath, buffer);
-        images.push(`/uploads/products/${fileName}`);
+
+        const uploaded = await new Promise((resolve, reject) => {
+          cloudinary.uploader
+            .upload_stream(
+              {
+                folder: "products",
+                resource_type: "image",
+                transformation: [{ width: 1200, height: 1200, crop: "limit" }],
+              },
+              (error, result) => {
+                if (error) return reject(error);
+                resolve(result);
+              }
+            )
+            .end(buffer);
+        });
+
+        interface UploadedResult {
+          secure_url: string;
+        }
+
+        newImages.push((uploaded as UploadedResult).secure_url);
       }
     }
 
@@ -85,21 +97,24 @@ export async function PUT(
       );
     }
 
-    const updatedImages = images.length > 0 ? images : product.images;
+    // Si pas de nouvelles images, on garde les anciennes
+    const finalImages = newImages.length > 0 ? newImages : product.images;
 
     product.name = name;
     product.description = description;
     product.price = price;
     product.stock = stock;
     product.category = category;
-    product.images = updatedImages;
+    product.images = finalImages;
     if (specifications !== undefined) product.specifications = specifications;
     if (discount !== undefined) product.discount = discount;
 
     await product.save();
 
-    await cacheDelete("products:all");
-    await cacheDelete(`products:${category}`);
+    await Promise.all([
+      cacheDelete("products:all"),
+      cacheDelete(`products:${category}`),
+    ]);
 
     return NextResponse.json(product, { status: 200 });
   } catch (error) {

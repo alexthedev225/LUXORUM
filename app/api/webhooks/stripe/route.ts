@@ -5,6 +5,8 @@ import Cart, { type ICart } from "@/models/Cart";
 import User from "@/models/User";
 import type { IProduct } from "@/models/Product";
 import dbConnect from "@/lib/mongoose";
+import Product from "@/models/Product";
+void Product; 
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",

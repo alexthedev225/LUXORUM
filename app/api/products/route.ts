@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { mkdir, writeFile } from "fs/promises";
-import path from "path";
 import { cacheGet, cacheSet, cacheDelete } from "@/lib/redis";
 import Product, { IProduct } from "@/models/Product";
 import "@/models/Category"; // Assure-toi que ce chemin est correct selon ta structure
 import dbConnect from "@/lib/mongoose";
 import { FilterQuery, ProjectionType } from "mongoose";
+import cloudinary from "@/lib/cloudinary";
 
+interface CloudinaryUploadResult {
+  secure_url: string;
+}
 export async function GET(req: NextRequest) {
   await dbConnect();
   const { searchParams } = new URL(req.url);
@@ -112,19 +114,48 @@ export async function POST(req: NextRequest) {
 
     const images: string[] = [];
     const imageFiles = formData.getAll("images");
-    const uploadDir = path.join(process.cwd(), "public", "uploads", "products");
 
     for (const imageFile of imageFiles) {
       if (imageFile instanceof Blob) {
-        await mkdir(uploadDir, { recursive: true });
-        const buffer = Buffer.from(await imageFile.arrayBuffer());
-        const fileName = `${Date.now()}-${(imageFile as File).name.replace(
-          /[^a-zA-Z0-9.]/g,
-          "_"
-        )}`;
-        const filePath = path.join(uploadDir, fileName);
-        await writeFile(filePath, buffer);
-        images.push(`/uploads/products/${fileName}`);
+        const arrayBuffer = await imageFile.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+
+        const result: CloudinaryUploadResult = await new Promise(
+          (resolve, reject) => {
+            cloudinary.uploader
+              .upload_stream(
+                {
+                  folder: "products",
+                  resource_type: "image",
+                  transformation: [
+                    { width: 1200, height: 1200, crop: "limit" }, // facultatif
+                  ],
+                },
+                (error, result) => {
+                  if (error) return reject(error);
+                  if (result) {
+                    resolve(result);
+                  } else {
+                    reject(new Error("Upload result is undefined"));
+                  }
+                }
+              )
+              .end(buffer);
+          }
+        );
+
+        if (
+          result &&
+          typeof result.secure_url === "string" &&
+          result.secure_url.trim() !== ""
+        ) {
+          images.push(result.secure_url);
+        } else {
+          console.warn(
+            "⚠️ Invalid or undefined secure_url in upload result:",
+            result
+          );
+        }
       }
     }
 
