@@ -1,77 +1,74 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import React from "react";
 import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 export function PromoBanner() {
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+        delayChildren: 0.3,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.7, ease: "easeOut" },
+    },
+  };
+
   return (
-    <section className="relative overflow-hidden rounded-2xl">
-      {/* Arrière-plan luxueux avec dégradé subtil */}
-      <div className="absolute inset-0 bg-black">
-        <div className="absolute inset-0 bg-gradient-to-b from-zinc-900/20 via-black to-black" />
-        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-amber-200/10 via-transparent to-transparent" />
-      </div>
-
-      {/* Ligne décorative supérieure */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-200/20 to-transparent" />
-
-      <motion.div
-        className="relative mx-auto max-w-screen-xl px-8 py-24"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 1 }}
-      >
-        <div className="flex flex-col md:flex-row items-center justify-between gap-12 md:gap-24">
-          {/* Texte principal */}
-          <motion.div
-            className="flex-1 space-y-6 text-center md:text-left"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2, duration: 0.8 }}
-          >
-            <div className="relative">
-              <h2 className="cinzel-decorative-black text-3xl md:text-4xl lg:text-5xl font-light tracking-tight text-white">
-                Exprimez votre pouvoir
-                <span className="block mt-3 text-amber-200/90">
-                  avec élégance
-                </span>
-              </h2>
-              <div className="absolute -left-8 top-0 w-1 h-full bg-amber-200/20 hidden md:block" />
-            </div>
-          </motion.div>
-
-          {/* Bouton */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.4, duration: 0.8 }}
-          >
-            <Button
-              asChild
-              className="relative group px-12 py-8 bg-transparent border border-amber-200/20 
-                       hover:border-amber-200/40 text-amber-100 hover:text-white
-                       uppercase tracking-widest text-sm font-light
-                       transition-all duration-500"
+    <section className="py-16 lg:py-24 bg-white relative overflow-hidden">
+      <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={containerVariants}
+          className="text-center space-y-6"
+        >
+          {/* Header */}
+          <motion.div variants={containerVariants}>
+            <motion.h2
+              className="font-serif text-3xl lg:text-5xl font-light text-gray-900 uppercase tracking-wide"
+              variants={itemVariants}
             >
-              <Link href="/boutique">
-                <span className="relative z-10">Découvrir</span>
-                <div
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 
-                              transition-opacity duration-500 bg-gradient-to-r 
-                              from-amber-200/10 via-amber-200/5 to-transparent"
-                />
-              </Link>
-            </Button>
+              Exprimez Votre Élégance
+            </motion.h2>
+            <motion.p
+              className="text-base lg:text-lg text-gray-600 max-w-xl mx-auto font-sans tracking-wide leading-relaxed"
+              variants={itemVariants}
+            >
+              Découvrez des bijoux qui incarnent le pouvoir et la sophistication
+              intemporelle.
+            </motion.p>
           </motion.div>
-        </div>
-      </motion.div>
 
-      {/* Ligne décorative inférieure */}
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-200/20 to-transparent" />
+          {/* CTA */}
+          <motion.div variants={itemVariants}>
+            <Link
+              href="/boutique"
+              className="group inline-flex items-center gap-2 text-gray-700 hover:text-amber-400 transition-colors duration-300"
+              aria-label="Découvrir la boutique LUXORUM"
+            >
+              <span className="text-sm uppercase font-medium tracking-wide">
+                Découvrir la Boutique
+              </span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+            </Link>
+          </motion.div>
+        </motion.div>
+      </div>
     </section>
   );
 }

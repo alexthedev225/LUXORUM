@@ -46,16 +46,12 @@ export default function LayoutClient({
   return (
     <>
       <div
-        className={` antialiased relative min-h-screen ${
-          theme === "dark"
-            ? "bg-black text-white"
-            : "bg-gradient-to-b from-amber-200/90 via-amber-100/90 to-amber-200/90 text-black"
-        }`}
+        className={` antialiased relative min-h-screen bg-white`}
       >
         <Navbar isAdmin={isAdmin} isAuthenticated={isAuthenticated} />
         <main
           className={`min-h-screen relative ${
-            isAuthPage ? "px-0 pt-0" : "px-2 pt-28"
+            isAuthPage ? "px-0 pt-0" : ""
           }`}
         >
           {children}
